@@ -119,31 +119,13 @@ export default function Hero() {
 
 export function BookCoverArt() {
   return (
-    <svg viewBox="0 0 400 600" aria-hidden="true" focusable="false" role="presentation">
-      <defs>
-        <radialGradient id="cvGlow" cx="200" cy="215" r="210" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#e5a850" stopOpacity="0.38" />
-          <stop offset="1" stopColor="#e5a850" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="400" height="600" fill="#12151a" />
-      <rect width="400" height="600" fill="url(#cvGlow)" />
-      <g>
-        <rect x="160" y="150" width="80" height="110" rx="2" fill="#0a0c0f" stroke="#2a3038" strokeWidth="2" />
-        <rect x="168" y="158" width="64" height="94" fill="#e5a850" opacity="0.92" />
-        <rect x="198" y="158" width="4" height="94" fill="#0a0c0f" />
-        <rect x="168" y="203" width="64" height="4" fill="#0a0c0f" />
-      </g>
-      <text x="200" y="360" textAnchor="middle" fill="#eceef0" fontFamily="Nunito, Arial, sans-serif" fontSize="32" fontWeight="800" letterSpacing="0">
-        Not Alone
-      </text>
-      <text x="200" y="402" textAnchor="middle" fill="#eceef0" fontFamily="Nunito, Arial, sans-serif" fontSize="32" fontWeight="800" letterSpacing="0">
-        at Midnight
-      </text>
-      <line x1="170" y1="436" x2="230" y2="436" stroke="#e5a850" strokeOpacity="0.7" />
-      <text x="200" y="478" textAnchor="middle" fill="#9aa3ad" fontFamily="Nunito, Arial, sans-serif" fontWeight="700" fontSize="11" letterSpacing="3">
-        A BOOK FOR THE LONG NIGHTS
-      </text>
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/book-cover.jpg"
+      width={512}
+      height={800}
+      alt="Book cover: Not Alone at Midnight. Rain on a window at night, with street lamps glowing in the distance."
+      style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+    />
   );
 }

@@ -50,24 +50,8 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
 
     /* ------------------------------- cover ------------------------------- */
     doc.rect(0, 0, W, H).fill(NIGHT);
-    const glow = doc.radialGradient(W / 2, 190, 0, W / 2, 190, 120);
-    glow.stop(0, GLOW, 0.55).stop(1, GLOW, 0);
-    doc.circle(W / 2, 190, 120).fill(glow);
-    doc.circle(W / 2, 190, 4).fill(GLOW);
-    doc.fillColor("#e8ebee").font("Bold").fontSize(30).text("Not Alone", 0, 330, { width: W, align: "center" });
-    doc.text("at Midnight", 0, 368, { width: W, align: "center" });
-    doc.fillColor("#9aa4ae").font("Mono").fontSize(8.5).text(book.subtitle.toUpperCase(), 48, 430, {
-      width: W - 96,
-      align: "center",
-      characterSpacing: 1.2,
-      lineGap: 4,
-    });
+    doc.image(path.join(process.cwd(), "public", "book-cover.jpg"), 0, 0, { cover: [W, H], align: "center", valign: "center" });
     doc.page.margins.bottom = 0;
-    doc.fillColor("#9aa4ae").font("Mono").fontSize(9).text(site.author.toUpperCase(), 0, H - 70, {
-      width: W,
-      align: "center",
-      characterSpacing: 2,
-    });
 
     /* ----------------------------- front matter -------------------------- */
     doc.addPage();

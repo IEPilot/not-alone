@@ -4,7 +4,7 @@ const nextConfig = {
   experimental: {
     // pdfkit reads its own data files at runtime, and the PDF route needs the font files.
     serverComponentsExternalPackages: ["pdfkit"],
-    outputFileTracingIncludes: { "/book/download": ["./assets/fonts/**/*"] },
+    outputFileTracingIncludes: { "/book/download": ["./assets/fonts/**/*", "./public/book-cover.jpg"] },
   },
   async headers() {
     return [

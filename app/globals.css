@@ -522,7 +522,7 @@ svg {
   }
 }
 .book-cover {
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 512 / 800;
   width: 100%;
   border-radius: 4px;
   background: linear-gradient(180deg, #14171b 0%, #1b2026 100%);
@@ -1102,3 +1102,5 @@ body.is-scrolled .site-header {
 .card-meta { color: var(--ink-soft); }
 .card-meta .cat { color: #b0443f; }
 .card-foot { color: #b0443f; }
+
+.book-cover { background: #0d1015; }
