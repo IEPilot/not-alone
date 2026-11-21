@@ -134,6 +134,16 @@ export async function getBookChapter(slug: string): Promise<Post | null> {
   return db.posts.find((x) => x.slug === slug && x.category === bookChapterCategory) || null;
 }
 
+export async function listBookChapters(): Promise<Post[]> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_posts").select("*").eq("category", bookChapterCategory).order("slug", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data || []) as Post[];
+  }
+  const db = await readLocal();
+  return db.posts.filter((x) => x.category === bookChapterCategory).sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
 export async function getPostById(id: string): Promise<Post | null> {
   if (hasSupabase) {
     const { data, error } = await sb().from("nam_posts").select("*").eq("id", id).maybeSingle();
