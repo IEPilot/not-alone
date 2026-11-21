@@ -1061,3 +1061,15 @@ body.is-scrolled .site-header {
   color: var(--amber);
   margin-bottom: 0.8rem;
 }
+
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-tagline {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--amber);
+  margin-top: 0.15rem;
+}
+@media (max-width: 420px) {
+  .brand { font-size: 1.05rem; }
+  .brand-tagline { font-size: 0.72rem; }
+}

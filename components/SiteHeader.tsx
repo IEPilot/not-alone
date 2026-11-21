@@ -28,7 +28,10 @@ export default function SiteHeader() {
       <div className="container header-inner">
         <Link href="/" className="brand" aria-label={`${site.name}, home`}>
           <span className="brand-lamp" aria-hidden="true" />
-          not alone at midnight
+          <span className="brand-text">
+            not alone at midnight
+            <span className="brand-tagline">{site.tagline}</span>
+          </span>
         </Link>
 
         <button
