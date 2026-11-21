@@ -1073,3 +1073,32 @@ body.is-scrolled .site-header {
   .brand { font-size: 1.05rem; }
   .brand-tagline { font-size: 0.72rem; }
 }
+
+/* Ripped-out journal page cards */
+:root {
+  --paper: #e8ecf1;
+  --paper-line: #c3d0e0;
+  --ink: #1f2630;
+  --ink-soft: #46515e;
+}
+.grid:has(> .card) { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)); }
+.card {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(90deg, transparent 2.6rem, rgba(214, 96, 110, 0.55) 2.6rem, rgba(214, 96, 110, 0.55) calc(2.6rem + 1.5px), transparent calc(2.6rem + 1.5px)),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 1.74rem, var(--paper-line) 1.74rem, var(--paper-line) calc(1.74rem + 1px));
+  background-position: 0 0, 0 1.2rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2.2rem 1.6rem 2.2rem 3.5rem;
+  clip-path: polygon(0.0% 3px, 3.8% 4px, 7.7% 6px, 11.5% 0px, 15.4% 2px, 19.2% 2px, 23.1% 3px, 26.9% 0px, 30.8% 1px, 34.6% 0px, 38.5% 2px, 42.3% 6px, 46.2% 6px, 50.0% 2px, 53.8% 1px, 57.7% 2px, 61.5% 6px, 65.4% 0px, 69.2% 2px, 73.1% 1px, 76.9% 0px, 80.8% 6px, 84.6% 0px, 88.5% 1px, 92.3% 0px, 96.2% 4px, 100.0% 5px, 100.0% calc(100% - 6px), 96.2% calc(100% - 4px), 92.3% calc(100% - 2px), 88.5% calc(100% - 5px), 84.6% calc(100% - 4px), 80.8% calc(100% - 2px), 76.9% calc(100% - 1px), 73.1% calc(100% - 3px), 69.2% calc(100% - 2px), 65.4% calc(100% - 2px), 61.5% calc(100% - 0px), 57.7% calc(100% - 1px), 53.8% calc(100% - 2px), 50.0% calc(100% - 6px), 46.2% calc(100% - 3px), 42.3% calc(100% - 2px), 38.5% calc(100% - 2px), 34.6% calc(100% - 3px), 30.8% calc(100% - 5px), 26.9% calc(100% - 1px), 23.1% calc(100% - 4px), 19.2% calc(100% - 1px), 15.4% calc(100% - 2px), 11.5% calc(100% - 5px), 7.7% calc(100% - 2px), 3.8% calc(100% - 3px), 0.0% calc(100% - 2px));
+}
+.grid > .card:nth-child(even) { clip-path: polygon(0.0% 4px, 3.8% 6px, 7.7% 6px, 11.5% 5px, 15.4% 2px, 19.2% 1px, 23.1% 2px, 26.9% 4px, 30.8% 1px, 34.6% 0px, 38.5% 0px, 42.3% 3px, 46.2% 6px, 50.0% 2px, 53.8% 4px, 57.7% 1px, 61.5% 1px, 65.4% 0px, 69.2% 6px, 73.1% 6px, 76.9% 2px, 80.8% 0px, 84.6% 3px, 88.5% 2px, 92.3% 2px, 96.2% 3px, 100.0% 0px, 100.0% calc(100% - 4px), 96.2% calc(100% - 2px), 92.3% calc(100% - 2px), 88.5% calc(100% - 0px), 84.6% calc(100% - 2px), 80.8% calc(100% - 4px), 76.9% calc(100% - 3px), 73.1% calc(100% - 6px), 69.2% calc(100% - 2px), 65.4% calc(100% - 4px), 61.5% calc(100% - 4px), 57.7% calc(100% - 0px), 53.8% calc(100% - 2px), 50.0% calc(100% - 1px), 46.2% calc(100% - 2px), 42.3% calc(100% - 1px), 38.5% calc(100% - 1px), 34.6% calc(100% - 2px), 30.8% calc(100% - 2px), 26.9% calc(100% - 2px), 23.1% calc(100% - 6px), 19.2% calc(100% - 1px), 15.4% calc(100% - 3px), 11.5% calc(100% - 4px), 7.7% calc(100% - 6px), 3.8% calc(100% - 5px), 0.0% calc(100% - 3px)); }
+.grid > .card:nth-child(3n) { clip-path: polygon(0.0% 2px, 3.8% 0px, 7.7% 5px, 11.5% 1px, 15.4% 1px, 19.2% 4px, 23.1% 2px, 26.9% 2px, 30.8% 6px, 34.6% 0px, 38.5% 0px, 42.3% 2px, 46.2% 1px, 50.0% 1px, 53.8% 0px, 57.7% 1px, 61.5% 6px, 65.4% 1px, 69.2% 2px, 73.1% 5px, 76.9% 0px, 80.8% 4px, 84.6% 6px, 88.5% 3px, 92.3% 5px, 96.2% 4px, 100.0% 1px, 100.0% calc(100% - 3px), 96.2% calc(100% - 2px), 92.3% calc(100% - 2px), 88.5% calc(100% - 6px), 84.6% calc(100% - 2px), 80.8% calc(100% - 3px), 76.9% calc(100% - 3px), 73.1% calc(100% - 5px), 69.2% calc(100% - 0px), 65.4% calc(100% - 2px), 61.5% calc(100% - 2px), 57.7% calc(100% - 6px), 53.8% calc(100% - 2px), 50.0% calc(100% - 5px), 46.2% calc(100% - 3px), 42.3% calc(100% - 1px), 38.5% calc(100% - 2px), 34.6% calc(100% - 0px), 30.8% calc(100% - 1px), 26.9% calc(100% - 5px), 23.1% calc(100% - 2px), 19.2% calc(100% - 1px), 15.4% calc(100% - 2px), 11.5% calc(100% - 6px), 7.7% calc(100% - 5px), 3.8% calc(100% - 2px), 0.0% calc(100% - 3px)); }
+.card:hover { box-shadow: none; border: 0; }
+.card h3, .card h3 a { color: var(--ink); font-family: "Caveat", "Segoe Script", cursive; font-weight: 600; font-size: 1.9rem; line-height: 1.1; }
+.card p { color: var(--ink-soft); }
+.card-meta { color: var(--ink-soft); }
+.card-meta .cat { color: #b0443f; }
+.card-foot { color: #b0443f; }
