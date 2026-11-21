@@ -100,8 +100,8 @@ export default async function Home() {
               <Link href="/book" className="btn">
                 About the book
               </Link>
-              <Link href="/book#notify" className="btn btn--ghost">
-                Tell me when it is ready
+              <Link href="/book/sample" className="btn btn--ghost">
+                Read Chapter 1 free
               </Link>
             </div>
           </div>

@@ -31,8 +31,10 @@ export const book = {
   title: "Not Alone at Midnight",
   subtitle: "Company for the hours when everything feels louder",
   // Change status/date when you have real news. These are shown on /book and the home page.
-  status: "Manuscript complete",
-  statusLine: "The manuscript is finished and being prepared for release. Join the list and you will hear first, with no pressure and no countdown clocks.",
+  status: "Available now",
+  statusLine: "$12 for the PDF, delivered instantly. Chapter 1 is free to read first, with no strings. Join the list if you would like to hear about new essays.",
+  price: "$12",
+  buyUrl: "https://buy.stripe.com/28E9AM9C81M4g9877y8og0a",
   pullQuote: "You don't have to solve tonight. You just have to get through this hour, and then the next one.",
   chapters: [
     "Midnight Is a Different Country",

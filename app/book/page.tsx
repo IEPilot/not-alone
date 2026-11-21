@@ -43,11 +43,11 @@ export default function BookPage() {
             </p>
             <p className="muted">{book.statusLine}</p>
             <div className="hero-actions" style={{ marginTop: "2rem" }}>
-              <Link href="/book/sample" className="btn">
+              <a href={book.buyUrl} className="btn">
+                Get the book · {book.price}
+              </a>
+              <Link href="/book/sample" className="btn btn--ghost">
                 Read Chapter 1 free
-              </Link>
-              <Link href="#notify" className="btn btn--ghost">
-                Tell me when it is ready
               </Link>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function BookPage() {
         <div className="container newsletter">
           <div>
             <p className="eyebrow">Be the first to know</p>
-            <h2 id="notify-title">Leave your email, and I will let you know when the book is ready.</h2>
+            <h2 id="notify-title">Leave your email, and I will let you know about new essays and anything new with the book.</h2>
             <p>
               That is the only thing I will use it for, plus the occasional reflection if you stay on the list. One click
               and you are gone whenever you like.
