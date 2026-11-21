@@ -1007,3 +1007,32 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
   transform: rotate(-3deg);
   margin-top: 0.4rem;
 }
+
+/* Scroll effects */
+#scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--amber);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 100;
+  pointer-events: none;
+}
+.reveal {
+  opacity: 0;
+  translate: 0 22px;
+  transition: opacity 0.7s ease, translate 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-in {
+  opacity: 1;
+  translate: 0 0;
+}
+body.is-scrolled .site-header {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; translate: none; transition: none; }
+  #scroll-progress { display: none; }
+}

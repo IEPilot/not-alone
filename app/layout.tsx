@@ -8,6 +8,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import ScrollEffects from "@/components/ScrollEffects";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
+        <ScrollEffects />
         <SiteHeader />
         <main id="main" tabIndex={-1}>
           {children}
