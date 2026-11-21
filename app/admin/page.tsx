@@ -2,6 +2,7 @@ import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/auth";
 import { backendName, listMessages, listPosts, listSubscribers } from "@/lib/store";
 import { formatDate } from "@/lib/markdown";
+import { bookChapterCategory } from "@/lib/site";
 import { deletePostAction, login, logout, togglePublishAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,9 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
     );
   }
 
-  const [posts, subs, msgs] = await Promise.all([listPosts({ includeDrafts: true }), listSubscribers(), listMessages()]);
+  const [allPosts, subs, msgs] = await Promise.all([listPosts({ includeDrafts: true }), listSubscribers(), listMessages()]);
+  const posts = allPosts.filter((p) => p.category !== bookChapterCategory);
+  const chapters = allPosts.filter((p) => p.category === bookChapterCategory).sort((a, b) => a.slug.localeCompare(b.slug));
   const active = subs.filter((s) => !s.unsubscribed_at);
 
   return (
@@ -135,6 +138,23 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
           </tbody>
         </table>
       </div>
+
+      <details style={{ marginTop: "3rem" }}>
+        <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+          The book: {chapters.length} chapters <span className="muted">(private, not part of the blog)</span>
+        </summary>
+        <p className="muted" style={{ marginTop: "0.8rem" }}>
+          These are the book&apos;s chapters. Only the PDF buyers receive, plus the free Chapter 1 sample, shows them.
+          They never appear on the blog.
+        </p>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {chapters.map((c) => (
+            <li key={c.id} style={{ padding: "0.35rem 0" }}>
+              <Link href={`/admin/${c.id}`}>{c.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </details>
 
       <h2 style={{ marginTop: "4rem" }}>
         Subscribers <span className="muted mono" style={{ fontSize: "0.9rem" }}>({active.length} active)</span>
