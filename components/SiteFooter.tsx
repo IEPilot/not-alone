@@ -7,6 +7,7 @@ export default function SiteFooter() {
       <div className="container">
         <div className="footer-grid">
           <div>
+            <p className="footer-tagline">{site.tagline}</p>
             <h2>The light is on</h2>
             <p className="footer-note">
               If tonight is heavy, you are welcome here at any hour. If you are in crisis or thinking about ending your

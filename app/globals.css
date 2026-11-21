@@ -1054,3 +1054,10 @@ body.is-scrolled .site-header {
   border-color: rgba(229, 168, 80, 0.6);
   box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.75), 0 0 40px -10px var(--amber-glow);
 }
+
+.footer-tagline {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--amber);
+  margin-bottom: 0.8rem;
+}

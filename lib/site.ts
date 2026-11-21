@@ -2,9 +2,9 @@
 
 export const site = {
   name: "Not Alone at Midnight",
-  tagline: "A light left on for the long nights.",
+  tagline: "You're not the only one awake.",
   description:
-    "A quiet place for people carrying grief, loneliness, anxiety, or a difficult night. Reflections, a book in progress, and gentle resources. You do not have to be awake alone.",
+    "A quiet place for people carrying grief, loneliness, anxiety, or a difficult night. Reflections, a book, and gentle resources. You do not have to be awake alone.",
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
   author: "Brian",
   contactEmail: "", // optional: shown on the contact page if you fill it in
