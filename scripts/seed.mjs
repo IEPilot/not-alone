@@ -27,7 +27,7 @@ const rows = seedPosts.map((p) => {
 });
 
 // ignoreDuplicates keeps any post you have already edited.
-const { error } = await sb.from("posts").upsert(rows, { onConflict: "slug", ignoreDuplicates: true });
+const { error } = await sb.from("nam_posts").upsert(rows, { onConflict: "slug", ignoreDuplicates: true });
 if (error) {
   console.error("Seed failed:", error.message);
   process.exit(1);

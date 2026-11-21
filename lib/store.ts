@@ -97,7 +97,7 @@ const byNewest = (a: Post, b: Post) =>
 
 export async function listPosts(opts: { includeDrafts?: boolean } = {}): Promise<Post[]> {
   if (hasSupabase) {
-    let q = sb().from("posts").select("*");
+    let q = sb().from("nam_posts").select("*");
     if (!opts.includeDrafts) q = q.eq("status", "published");
     const { data, error } = await q;
     if (error) throw new Error(error.message);
@@ -110,7 +110,7 @@ export async function listPosts(opts: { includeDrafts?: boolean } = {}): Promise
 
 export async function getPostBySlug(slug: string, opts: { includeDrafts?: boolean } = {}): Promise<Post | null> {
   if (hasSupabase) {
-    let q = sb().from("posts").select("*").eq("slug", slug);
+    let q = sb().from("nam_posts").select("*").eq("slug", slug);
     if (!opts.includeDrafts) q = q.eq("status", "published");
     const { data, error } = await q.maybeSingle();
     if (error) throw new Error(error.message);
@@ -124,7 +124,7 @@ export async function getPostBySlug(slug: string, opts: { includeDrafts?: boolea
 
 export async function getPostById(id: string): Promise<Post | null> {
   if (hasSupabase) {
-    const { data, error } = await sb().from("posts").select("*").eq("id", id).maybeSingle();
+    const { data, error } = await sb().from("nam_posts").select("*").eq("id", id).maybeSingle();
     if (error) throw new Error(error.message);
     return (data as Post) || null;
   }
@@ -137,11 +137,11 @@ export async function savePost(id: string | null, input: PostInput): Promise<Pos
   if (hasSupabase) {
     const row = { ...input, updated_at: now };
     if (id) {
-      const { data, error } = await sb().from("posts").update(row).eq("id", id).select().single();
+      const { data, error } = await sb().from("nam_posts").update(row).eq("id", id).select().single();
       if (error) throw new Error(error.code === "23505" ? "That web address (slug) is already used by another post." : error.message);
       return data as Post;
     }
-    const { data, error } = await sb().from("posts").insert(row).select().single();
+    const { data, error } = await sb().from("nam_posts").insert(row).select().single();
     if (error) throw new Error(error.code === "23505" ? "That web address (slug) is already used by another post." : error.message);
     return data as Post;
   }
@@ -164,7 +164,7 @@ export async function savePost(id: string | null, input: PostInput): Promise<Pos
 
 export async function deletePost(id: string): Promise<void> {
   if (hasSupabase) {
-    const { error } = await sb().from("posts").delete().eq("id", id);
+    const { error } = await sb().from("nam_posts").delete().eq("id", id);
     if (error) throw new Error(error.message);
     return;
   }
@@ -178,17 +178,17 @@ export async function deletePost(id: string): Promise<void> {
 export async function addSubscriber(email: string, source: string): Promise<{ isNew: boolean; token: string }> {
   const clean = email.trim().toLowerCase();
   if (hasSupabase) {
-    const existing = await sb().from("subscribers").select("id, token, unsubscribed_at").eq("email", clean).maybeSingle();
+    const existing = await sb().from("nam_subscribers").select("id, token, unsubscribed_at").eq("email", clean).maybeSingle();
     if (existing.error) throw new Error(existing.error.message);
     if (existing.data) {
       if (existing.data.unsubscribed_at) {
-        const { error } = await sb().from("subscribers").update({ unsubscribed_at: null, source }).eq("id", existing.data.id);
+        const { error } = await sb().from("nam_subscribers").update({ unsubscribed_at: null, source }).eq("id", existing.data.id);
         if (error) throw new Error(error.message);
         return { isNew: true, token: existing.data.token };
       }
       return { isNew: false, token: existing.data.token };
     }
-    const { data, error } = await sb().from("subscribers").insert({ email: clean, source }).select("token").single();
+    const { data, error } = await sb().from("nam_subscribers").insert({ email: clean, source }).select("token").single();
     if (error) throw new Error(error.message);
     return { isNew: true, token: data.token };
   }
@@ -220,7 +220,7 @@ export async function unsubscribeByToken(token: string): Promise<boolean> {
   const now = new Date().toISOString();
   if (hasSupabase) {
     const { data, error } = await sb()
-      .from("subscribers")
+      .from("nam_subscribers")
       .update({ unsubscribed_at: now })
       .eq("token", token)
       .select("id");
@@ -237,7 +237,7 @@ export async function unsubscribeByToken(token: string): Promise<boolean> {
 
 export async function listSubscribers(): Promise<Subscriber[]> {
   if (hasSupabase) {
-    const { data, error } = await sb().from("subscribers").select("*").order("created_at", { ascending: false });
+    const { data, error } = await sb().from("nam_subscribers").select("*").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return (data || []) as Subscriber[];
   }
@@ -249,7 +249,7 @@ export async function listSubscribers(): Promise<Subscriber[]> {
 
 export async function addMessage(m: { name: string; email: string; message: string }): Promise<void> {
   if (hasSupabase) {
-    const { error } = await sb().from("messages").insert(m);
+    const { error } = await sb().from("nam_messages").insert(m);
     if (error) throw new Error(error.message);
     return;
   }
@@ -260,7 +260,7 @@ export async function addMessage(m: { name: string; email: string; message: stri
 
 export async function listMessages(): Promise<Message[]> {
   if (hasSupabase) {
-    const { data, error } = await sb().from("messages").select("*").order("created_at", { ascending: false });
+    const { data, error } = await sb().from("nam_messages").select("*").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return (data || []) as Message[];
   }

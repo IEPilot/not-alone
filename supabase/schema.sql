@@ -1,8 +1,9 @@
+-- Tables are prefixed nam_ so they can safely share a Supabase project with other sites.
 -- Run this once in the Supabase SQL editor (Project > SQL Editor > New query > paste > Run).
 
 create extension if not exists pgcrypto;
 
-create table if not exists public.posts (
+create table if not exists public.nam_posts (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,
   title text not null,
@@ -16,7 +17,7 @@ create table if not exists public.posts (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.subscribers (
+create table if not exists public.nam_subscribers (
   id uuid primary key default gen_random_uuid(),
   email text not null unique,
   source text not null default 'site',
@@ -25,7 +26,7 @@ create table if not exists public.subscribers (
   unsubscribed_at timestamptz
 );
 
-create table if not exists public.messages (
+create table if not exists public.nam_messages (
   id uuid primary key default gen_random_uuid(),
   name text not null default '',
   email text not null default '',
@@ -35,8 +36,8 @@ create table if not exists public.messages (
 
 -- The site talks to the database only from the server using the service role key.
 -- Turning on row level security with no public policies means the public (anon) key can read or write nothing.
-alter table public.posts enable row level security;
-alter table public.subscribers enable row level security;
-alter table public.messages enable row level security;
+alter table public.nam_posts enable row level security;
+alter table public.nam_subscribers enable row level security;
+alter table public.nam_messages enable row level security;
 
-create index if not exists posts_status_published_idx on public.posts (status, published_at desc);
+create index if not exists nam_posts_status_published_idx on public.nam_posts (status, published_at desc);
