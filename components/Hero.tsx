@@ -134,14 +134,14 @@ export function BookCoverArt() {
         <rect x="198" y="158" width="4" height="94" fill="#0a0c0f" />
         <rect x="168" y="203" width="64" height="4" fill="#0a0c0f" />
       </g>
-      <text x="200" y="360" textAnchor="middle" fill="#eceef0" fontFamily="Merriweather, Georgia, serif" fontSize="30" fontWeight="300" letterSpacing="1">
+      <text x="200" y="360" textAnchor="middle" fill="#eceef0" fontFamily="Nunito, Arial, sans-serif" fontSize="32" fontWeight="800" letterSpacing="0">
         Not Alone
       </text>
-      <text x="200" y="402" textAnchor="middle" fill="#eceef0" fontFamily="Merriweather, Georgia, serif" fontSize="30" fontWeight="300" letterSpacing="1">
+      <text x="200" y="402" textAnchor="middle" fill="#eceef0" fontFamily="Nunito, Arial, sans-serif" fontSize="32" fontWeight="800" letterSpacing="0">
         at Midnight
       </text>
       <line x1="170" y1="436" x2="230" y2="436" stroke="#e5a850" strokeOpacity="0.7" />
-      <text x="200" y="478" textAnchor="middle" fill="#9aa3ad" fontFamily="JetBrains Mono, monospace" fontSize="11" letterSpacing="3">
+      <text x="200" y="478" textAnchor="middle" fill="#9aa3ad" fontFamily="Nunito, Arial, sans-serif" fontWeight="700" fontSize="11" letterSpacing="3">
         A BOOK FOR THE LONG NIGHTS
       </text>
     </svg>

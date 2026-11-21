@@ -38,11 +38,11 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.registerFont("Body", F("merriweather-latin-400-normal.woff"));
-    doc.registerFont("BodyItalic", F("merriweather-latin-400-italic.woff"));
-    doc.registerFont("Bold", F("merriweather-latin-700-normal.woff"));
-    doc.registerFont("BoldItalic", F("merriweather-latin-700-italic.woff"));
-    doc.registerFont("Mono", F("jetbrains-mono-latin-400-normal.woff"));
+    doc.registerFont("Body", F("nunito-latin-400-normal.woff"));
+    doc.registerFont("BodyItalic", F("nunito-latin-400-italic.woff"));
+    doc.registerFont("Bold", F("nunito-latin-800-normal.woff"));
+    doc.registerFont("BoldItalic", F("nunito-latin-800-italic.woff"));
+    doc.registerFont("Mono", F("nunito-latin-700-normal.woff"));
 
     const W = doc.page.width;
     const H = doc.page.height;
@@ -133,13 +133,13 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
           const text = m ? m[2] : t.replace(/^>\s?/gm, "");
           const x = 56 + 14;
           const w = contentW - 14;
-          doc.font("Body").fontSize(10);
+          doc.font("Body").fontSize(10.5);
           const textH = doc.heightOfString(text, { width: w, lineGap: 4 }) + 24;
           if (doc.y + textH > H - 80) doc.addPage();
           const y0 = doc.y;
           doc.fillColor(AMBER).font("Mono").fontSize(7.5).text(label, x, y0, { width: w, characterSpacing: 1.4 });
           doc.moveDown(0.4);
-          doc.fillColor(SOFT).font("BodyItalic").fontSize(10).text(text, x, doc.y, { width: w, lineGap: 4 });
+          doc.fillColor(SOFT).font("BodyItalic").fontSize(10.5).text(text, x, doc.y, { width: w, lineGap: 4 });
           const y1 = doc.y;
           doc.moveTo(56, y0 - 1).lineTo(56, y1).lineWidth(1.2).strokeColor(AMBER).stroke();
           doc.x = 56;
@@ -150,7 +150,7 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
             doc.fillColor(INK).font(r.italic ? "BodyItalic" : "Body").fontSize(10.5);
             doc.text(r.text, idx === 0 ? 56 : undefined, idx === 0 ? doc.y : undefined, {
               width: contentW,
-              lineGap: 5.5,
+              lineGap: 4.5,
               continued: idx < rs.length - 1,
             });
           });

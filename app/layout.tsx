@@ -1,10 +1,9 @@
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/400-italic.css";
+import "@fontsource/nunito/600.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/nunito/800.css";
 import type { Metadata, Viewport } from "next";
-import "@fontsource/merriweather/300.css";
-import "@fontsource/merriweather/300-italic.css";
-import "@fontsource/merriweather/400.css";
-import "@fontsource/merriweather/700.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
