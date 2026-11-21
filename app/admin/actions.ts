@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { checkPassword, endSession, requireAdmin, startSession, adminConfigured } from "@/lib/auth";
 import { deletePost, getPostById, savePost } from "@/lib/store";
 import { slugify } from "@/lib/markdown";
-import { categories } from "@/lib/site";
+import { categories, bookChapterCategory } from "@/lib/site";
 import { tooMany } from "@/lib/rateLimit";
 
 export async function login(formData: FormData) {
@@ -40,7 +40,7 @@ export async function savePostAction(formData: FormData) {
   if (!title) redirect(`/admin/${id ?? "new"}?error=${encodeURIComponent("Please give the post a title.")}`);
 
   const slug = slugify(String(formData.get("slug") || "") || title) || "untitled";
-  const category = categories.includes(String(formData.get("category"))) ? String(formData.get("category")) : "Hope";
+  const category = [...categories, bookChapterCategory].includes(String(formData.get("category"))) ? String(formData.get("category")) : "Hope";
   const excerpt = String(formData.get("excerpt") || "").trim().slice(0, 400);
   const featured = formData.get("featured") === "on";
 

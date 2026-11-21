@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { bookChapterCategory } from "@/lib/site";
 // @ts-ignore - plain JS module shared with the seed script
 import { seedPosts } from "@/content/seed-posts.mjs";
 
@@ -98,27 +99,27 @@ const byNewest = (a: Post, b: Post) =>
 export async function listPosts(opts: { includeDrafts?: boolean } = {}): Promise<Post[]> {
   if (hasSupabase) {
     let q = sb().from("nam_posts").select("*");
-    if (!opts.includeDrafts) q = q.eq("status", "published");
+    if (!opts.includeDrafts) q = q.eq("status", "published").neq("category", bookChapterCategory);
     const { data, error } = await q;
     if (error) throw new Error(error.message);
     return ((data || []) as Post[]).sort(byNewest);
   }
   const db = await readLocal();
-  const posts = opts.includeDrafts ? db.posts : db.posts.filter((p) => p.status === "published");
+  const posts = opts.includeDrafts ? db.posts : db.posts.filter((p) => p.status === "published" && p.category !== bookChapterCategory);
   return [...posts].sort(byNewest);
 }
 
 export async function getPostBySlug(slug: string, opts: { includeDrafts?: boolean } = {}): Promise<Post | null> {
   if (hasSupabase) {
     let q = sb().from("nam_posts").select("*").eq("slug", slug);
-    if (!opts.includeDrafts) q = q.eq("status", "published");
+    if (!opts.includeDrafts) q = q.eq("status", "published").neq("category", bookChapterCategory);
     const { data, error } = await q.maybeSingle();
     if (error) throw new Error(error.message);
     return (data as Post) || null;
   }
   const db = await readLocal();
   const p = db.posts.find((x) => x.slug === slug);
-  if (!p || (!opts.includeDrafts && p.status !== "published")) return null;
+  if (!p || (!opts.includeDrafts && (p.status !== "published" || p.category === bookChapterCategory))) return null;
   return p;
 }
 

@@ -941,3 +941,9 @@ select:focus {
     padding-block: 4.5rem 4rem;
   }
 }
+
+/* Book contents list */
+.chapter-list{list-style:none;margin:0;padding:0}
+.chapter-list li{display:flex;gap:1.25rem;align-items:baseline;padding:.95rem 0;border-top:1px solid var(--line, rgba(214,218,222,.12))}
+.chapter-list li:last-child{border-bottom:1px solid var(--line, rgba(214,218,222,.12))}
+.chapter-num{font-family:"JetBrains Mono",monospace;font-size:.8rem;color:var(--amber);width:1.8rem;flex-shrink:0}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { getPostById } from "@/lib/store";
-import { categories } from "@/lib/site";
+import { categories, bookChapterCategory } from "@/lib/site";
 import { savePostAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function EditPost({
           <div className="field">
             <label htmlFor="category">Category</label>
             <select id="category" name="category" defaultValue={post?.category ?? "Hope"}>
-              {categories.map((c) => (
+              {[...categories, bookChapterCategory].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>

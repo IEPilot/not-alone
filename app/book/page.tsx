@@ -32,9 +32,14 @@ export default function BookPage() {
             <h1 id="book-h1">{book.title}</h1>
             <p className="lede">{book.subtitle}.</p>
             <p>
-              For the person staring at the ceiling at 2 a.m. For the first holiday with an empty chair. For the long
-              stretch between Christmas and New Year&apos;s when everyone else seems to be celebrating. This is a book that
-              sits beside you instead of cheering you up.
+              Sixteen chapters for the nights that need more than a single essay. Written for the hours after midnight,
+              when sleep will not come, when grief sits heavier than usual, when the quiet of the house starts to feel
+              less peaceful and more isolating. Each chapter moves through a different shape that hard nights take, with
+              reflective questions and small practices woven through, not bolted on.
+            </p>
+            <p>
+              This is not a book about fixing yourself before morning. It is company for the parts of the night that are
+              hardest to be alone in.
             </p>
             <p className="muted">{book.statusLine}</p>
             <div className="hero-actions" style={{ marginTop: "2rem" }}>
@@ -42,7 +47,7 @@ export default function BookPage() {
                 Tell me when it is ready
               </Link>
               <Link href="/blog" className="btn btn--ghost">
-                Read a few pages from the blog
+                Start with the essays
               </Link>
             </div>
           </div>
@@ -50,19 +55,26 @@ export default function BookPage() {
       </section>
 
       <section className="section section--raised" aria-labelledby="inside-title">
-        <div className="container">
-          <p className="eyebrow">What it is about</p>
-          <h2 id="inside-title" style={{ marginBottom: "2.4rem" }}>
-            Company, not correction
+        <div className="narrow">
+          <blockquote className="prose">
+            {book.pullQuote} <cite style={{ display: "block", marginTop: "0.6rem" }}>From Chapter 1</cite>
+          </blockquote>
+          <p className="eyebrow" style={{ marginTop: "3rem" }}>Contents</p>
+          <h2 id="inside-title" style={{ marginBottom: "1.6rem" }}>
+            Sixteen chapters, one hour at a time
           </h2>
-          <div className="grid grid--2">
-            {book.themes.map((t) => (
-              <div className="card" key={t.title}>
-                <h3>{t.title}</h3>
-                <p>{t.text}</p>
-              </div>
+          <ol className="chapter-list">
+            {book.chapters.map((title, i) => (
+              <li key={title}>
+                <span className="chapter-num">{String(i + 1).padStart(2, "0")}</span>
+                <span>{title}</span>
+              </li>
             ))}
-          </div>
+          </ol>
+          <p className="muted" style={{ marginTop: "1.6rem" }}>
+            The book is not required reading to be here. The <Link href="/blog">essays on the blog</Link> stand on their
+            own. The book is for anyone who wants to go further into the same quiet room.
+          </p>
         </div>
       </section>
 
