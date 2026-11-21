@@ -995,3 +995,15 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
 @media (max-width: 820px) { .nav a { border-bottom: 1px dashed var(--line); border-radius: 0; } .nav a[aria-current="page"] { background: none; } }
 .field input, .field textarea, .field select, .inline-form input { border-radius: 14px; }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+
+/* Handwritten signature */
+.signature {
+  display: inline-block;
+  font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  font-weight: 600;
+  font-size: 3rem;
+  line-height: 1.1;
+  color: var(--amber);
+  transform: rotate(-3deg);
+  margin-top: 0.4rem;
+}

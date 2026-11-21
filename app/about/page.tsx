@@ -60,7 +60,7 @@ export default function AboutPage() {
           <p style={{ marginTop: "2.5rem" }}>
             Thank you for being here.
             <br />
-            <span className="muted">Brian</span>
+            <span className="signature">Brian</span>
           </p>
         </div>
       </section>
