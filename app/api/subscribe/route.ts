@@ -6,7 +6,7 @@ import { clientIp, tooMany } from "@/lib/rateLimit";
 export const dynamic = "force-dynamic";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const SOURCES = new Set(["site", "home", "footer", "book", "blog", "article", "about"]);
+const SOURCES = new Set(["site", "home", "footer", "book", "blog", "article", "about", "book-sample"]);
 
 export async function POST(req: Request) {
   let body: any;

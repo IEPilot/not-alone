@@ -22,6 +22,9 @@ export const nav = [
 export const categories = ["Grief", "Loneliness", "Anxiety", "Difficult Nights", "Holidays", "Hope"];
 
 // Book chapters live in the same table as posts but are never shown on the public blog.
+// The one chapter anyone can read for free.
+export const sampleChapterSlug = "chapter-01-midnight-is-a-different-country";
+
 export const bookChapterCategory = "Book chapter";
 
 export const book = {

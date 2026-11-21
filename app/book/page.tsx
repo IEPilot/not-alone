@@ -43,11 +43,11 @@ export default function BookPage() {
             </p>
             <p className="muted">{book.statusLine}</p>
             <div className="hero-actions" style={{ marginTop: "2rem" }}>
-              <Link href="#notify" className="btn">
-                Tell me when it is ready
+              <Link href="/book/sample" className="btn">
+                Read Chapter 1 free
               </Link>
-              <Link href="/blog" className="btn btn--ghost">
-                Start with the essays
+              <Link href="#notify" className="btn btn--ghost">
+                Tell me when it is ready
               </Link>
             </div>
           </div>

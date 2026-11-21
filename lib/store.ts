@@ -123,6 +123,17 @@ export async function getPostBySlug(slug: string, opts: { includeDrafts?: boolea
   return p;
 }
 
+// Fetches one book chapter by its exact slug, whatever its status. Callers decide which chapters are public.
+export async function getBookChapter(slug: string): Promise<Post | null> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_posts").select("*").eq("slug", slug).eq("category", bookChapterCategory).maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as Post) || null;
+  }
+  const db = await readLocal();
+  return db.posts.find((x) => x.slug === slug && x.category === bookChapterCategory) || null;
+}
+
 export async function getPostById(id: string): Promise<Post | null> {
   if (hasSupabase) {
     const { data, error } = await sb().from("nam_posts").select("*").eq("id", id).maybeSingle();
