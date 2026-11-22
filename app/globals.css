@@ -1237,3 +1237,17 @@ body.is-scrolled .site-header {
   .bokeh-1 { left: 50%; top: 4%; }
   .hero-note { font-size: 1.8rem; }
 }
+
+/* The tagline, in the same pen-on-paper handwriting in the header and under the hero */
+:root { --font-hand: "Homemade Apple", "Segoe Script", "Bradley Hand", cursive; }
+.brand-tagline,
+.hero-note {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  color: var(--amber-bright);
+  text-transform: lowercase;
+}
+.brand-tagline { font-size: 0.78rem; line-height: 1.5; margin-top: 0.15rem; }
+.hero-note { font-size: 1.6rem; line-height: 1.6; transform: rotate(-1.5deg); transform-origin: left center; }
+@media (max-width: 760px) { .hero-note { font-size: 1.3rem; } }
+@media (max-width: 420px) { .brand-tagline { font-size: 0.7rem; } }
