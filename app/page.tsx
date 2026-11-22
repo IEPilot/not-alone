@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Hero, { BookCoverArt } from "@/components/Hero";
+import { BookCoverArt } from "@/components/Hero";
 import Newsletter from "@/components/Newsletter";
 import PostCard from "@/components/PostCard";
 import { listPosts } from "@/lib/store";
@@ -15,10 +15,17 @@ export default async function Home() {
   return (
     <>
       <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-art">
-          <Hero />
+        <div className="hero-art" aria-hidden="true">
+          <span className="bokeh bokeh-1" />
+          <span className="bokeh bokeh-2" />
+          <span className="bokeh bokeh-3" />
+          <span className="bokeh bokeh-4" />
+          <span className="drip drip-1" />
+          <span className="drip drip-2" />
+          <span className="drip drip-3" />
         </div>
         <div className="container hero-inner">
+          <div className="hero-glass">
           <p className="eyebrow">A quiet place for hard hours</p>
           <h1 id="hero-title">You do not have to be awake alone.</h1>
           <p className="lede">
@@ -32,6 +39,7 @@ export default async function Home() {
             <Link href="/resources" className="btn btn--ghost">
               Find support
             </Link>
+          </div>
           </div>
         </div>
       </section>
