@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Hero, { BookCoverArt } from "@/components/Hero";
+import { BookCoverArt, RainyWindow } from "@/components/Hero";
 import Newsletter from "@/components/Newsletter";
 import PostCard from "@/components/PostCard";
 import { listPosts } from "@/lib/store";
@@ -14,25 +14,27 @@ export default async function Home() {
 
   return (
     <>
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-art">
-          <Hero />
+      <section className="hero hero--rain" aria-labelledby="hero-title">
+        <div className="hero-art" aria-hidden="true">
+          <RainyWindow />
         </div>
         <div className="container hero-inner">
-          <p className="eyebrow">A quiet place for hard hours</p>
-          <h1 id="hero-title">You do not have to be awake alone.</h1>
-          <p className="lede">
-            Welcome. This is a place for grief, loneliness, anxiety, and the nights that feel too long. There is nothing to
-            fix here and nothing to prove. Sit down. The light is on.
-          </p>
-          <div className="hero-actions">
-            <Link href="/blog" className="btn">
-              Read tonight&apos;s words
-            </Link>
-            <Link href="/resources" className="btn btn--ghost">
-              Find support
-            </Link>
+          <div className="hero-glass">
+            <p className="eyebrow">A quiet place for hard hours</p>
+            <h1 id="hero-title">You do not have to be awake alone.</h1>
+            <p className="lede">
+              Grief, loneliness, anxiety, and the nights that feel too long. Sit a while. The light is on.
+            </p>
+            <div className="hero-actions">
+              <Link href="/book/sample" className="btn">
+                Read Chapter 1 free
+              </Link>
+              <Link href="/book" className="btn btn--glass">
+                Get the book · {book.price}
+              </Link>
+            </div>
           </div>
+          <p className="hero-note">{site.tagline}</p>
         </div>
       </section>
 
