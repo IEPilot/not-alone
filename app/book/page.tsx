@@ -30,7 +30,9 @@ export default function BookPage() {
           <div>
             <p className="eyebrow">The book · {book.status}</p>
             <h1 id="book-h1">{book.title}</h1>
-            <p className="lede">{book.subtitle}.</p>
+            <p className="lede">
+              <strong>{book.tagline}.</strong> {book.subtitle}.
+            </p>
             <p>
               Sixteen chapters for the nights that need more than a single essay. Written for the hours after midnight,
               when sleep will not come, when grief sits heavier than usual, when the quiet of the house starts to feel
@@ -57,7 +59,7 @@ export default function BookPage() {
       <section className="section section--raised" aria-labelledby="inside-title">
         <div className="narrow">
           <blockquote className="prose">
-            {book.pullQuote} <cite style={{ display: "block", marginTop: "0.6rem" }}>From Chapter 1</cite>
+            {book.pullQuote} <cite style={{ display: "block", marginTop: "0.6rem" }}>From the opening note</cite>
           </blockquote>
           <p className="eyebrow" style={{ marginTop: "3rem" }}>Contents</p>
           <h2 id="inside-title" style={{ marginBottom: "1.6rem" }}>

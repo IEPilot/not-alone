@@ -13,17 +13,24 @@ const AMBER = "#b97d1c"; // readable amber on white
 const NIGHT = "#111316";
 const GLOW = "#e5a850";
 
-type Run = { text: string; italic: boolean };
+type Run = { text: string; italic: boolean; bold: boolean };
 
+// Inline Markdown the chapters use: **bold**, *italic*, and \_ for a literal underscore.
 function runs(s: string): Run[] {
   const out: Run[] = [];
-  const parts = s.split(/(\*[^*]+\*)/g).filter(Boolean);
+  const parts = s.replace(/\\_/g, "_").split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
   for (const p of parts) {
-    if (p.startsWith("*") && p.endsWith("*") && p.length > 2) out.push({ text: p.slice(1, -1), italic: true });
-    else out.push({ text: p, italic: false });
+    if (p.startsWith("**") && p.endsWith("**") && p.length > 4) out.push({ text: p.slice(2, -2), italic: false, bold: true });
+    else if (p.startsWith("*") && p.endsWith("*") && p.length > 2) out.push({ text: p.slice(1, -1), italic: true, bold: false });
+    else out.push({ text: p, italic: false, bold: false });
   }
   return out;
 }
+
+const font = (r: Run) => (r.bold ? (r.italic ? "BoldItalic" : "Bold") : r.italic ? "BodyItalic" : "Body");
+
+// The opening note ("chapter-00-...") is printed before the numbered chapters, without a number.
+const isOpeningNote = (slug: string) => slug.startsWith("chapter-00-");
 
 export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -56,7 +63,7 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
     /* ----------------------------- front matter -------------------------- */
     doc.addPage();
     doc.page.margins.bottom = 0;
-    doc.fillColor(INK).font("Mono").fontSize(8.5).text("BEFORE YOU BEGIN", { characterSpacing: 1.5 });
+    doc.fillColor(INK).font("Mono").fontSize(8.5).text("ABOUT THIS BOOK", { characterSpacing: 1.5 });
     doc.moveDown(1.2);
     doc.font("Body").fontSize(10.5).fillColor(INK).text(
       "This book is not a program and it will not ask you to fix yourself before morning. Read a page, or a chapter, or just one line. Stop whenever you like. Each chapter ends with a small practice, and each has a question you can answer or ignore.",
@@ -93,17 +100,33 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
     doc.addPage();
     doc.fillColor(INK).font("Mono").fontSize(8.5).text("CONTENTS", { characterSpacing: 1.5 });
     doc.moveDown(1.2);
-    chapters.forEach((c, i) => {
+    let tocNumber = 0;
+    chapters.forEach((c) => {
       const y = doc.y;
-      doc.fillColor(AMBER).font("Mono").fontSize(8.5).text(String(i + 1).padStart(2, "0"), 56, y + 1.5, { width: 28, lineBreak: false });
+      const num = isOpeningNote(c.slug) ? "" : String(++tocNumber).padStart(2, "0");
+      doc.fillColor(AMBER).font("Mono").fontSize(8.5).text(num, 56, y + 1.5, { width: 28, lineBreak: false });
       doc.fillColor(INK).font("Body").fontSize(10.5).text(c.title, 90, y, { width: contentW - 34, lineGap: 2 });
       doc.moveDown(0.55);
     });
 
     /* ------------------------------- chapters ---------------------------- */
-    chapters.forEach((c, i) => {
+    const paragraph = (text: string, x: number, width: number) => {
+      const rs = runs(text.replace(/\n/g, " "));
+      rs.forEach((r, idx) => {
+        doc.fillColor(INK).font(font(r)).fontSize(10.5);
+        doc.text(r.text, idx === 0 ? x : undefined, idx === 0 ? doc.y : undefined, {
+          width,
+          lineGap: 4.5,
+          continued: idx < rs.length - 1,
+        });
+      });
+    };
+
+    let chapterNumber = 0;
+    chapters.forEach((c) => {
       doc.addPage();
-      doc.fillColor(AMBER).font("Mono").fontSize(8.5).text(`CHAPTER ${String(i + 1).padStart(2, "0")}`, 56, 96, { characterSpacing: 2 });
+      const label = isOpeningNote(c.slug) ? "BEFORE WE BEGIN" : `CHAPTER ${String(++chapterNumber).padStart(2, "0")}`;
+      doc.fillColor(AMBER).font("Mono").fontSize(8.5).text(label, 56, 96, { characterSpacing: 2 });
       doc.moveDown(0.5);
       doc.fillColor(INK).font("Bold").fontSize(21).text(c.title, 56, doc.y, { width: contentW, lineGap: 4 });
       doc.moveDown(1.6);
@@ -128,16 +151,27 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
           doc.moveTo(56, y0 - 1).lineTo(56, y1).lineWidth(1.2).strokeColor(AMBER).stroke();
           doc.x = 56;
           doc.moveDown(1.1);
+        } else if (t.startsWith("## ")) {
+          // Section heading inside a chapter; start a new page rather than strand it at the bottom.
+          if (doc.y > H - 150) doc.addPage();
+          else doc.moveDown(0.6);
+          doc.fillColor(INK).font("Bold").fontSize(13).text(t.slice(3).trim(), 56, doc.y, { width: contentW, lineGap: 3 });
+          doc.moveDown(0.7);
+        } else if (t.split("\n").every((l) => /^(- |\d+\. )/.test(l))) {
+          // A bulleted or numbered list: one item per line.
+          for (const line of t.split("\n")) {
+            const m = line.match(/^(- |(\d+)\. )(.*)$/)!;
+            if (doc.y > H - 100) doc.addPage();
+            const y = doc.y;
+            doc.fillColor(AMBER).font("Mono").fontSize(10).text(m[2] ? `${m[2]}.` : "•", 60, y, { width: 16, lineBreak: false });
+            doc.y = y;
+            paragraph(m[3], 78, contentW - 22);
+            doc.moveDown(0.35);
+          }
+          doc.x = 56;
+          doc.moveDown(0.55);
         } else {
-          const rs = runs(t.replace(/\n/g, " "));
-          rs.forEach((r, idx) => {
-            doc.fillColor(INK).font(r.italic ? "BodyItalic" : "Body").fontSize(10.5);
-            doc.text(r.text, idx === 0 ? 56 : undefined, idx === 0 ? doc.y : undefined, {
-              width: contentW,
-              lineGap: 4.5,
-              continued: idx < rs.length - 1,
-            });
-          });
+          paragraph(t, 56, contentW);
           doc.moveDown(0.9);
         }
       }
