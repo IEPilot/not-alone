@@ -21,9 +21,10 @@ export default async function Home() {
         <div className="container hero-inner">
           <div className="hero-glass">
             <p className="eyebrow">A quiet place for hard hours</p>
-            <h1 id="hero-title">You do not have to be awake alone.</h1>
+            <h1 id="hero-title">You don&apos;t have to solve tonight.</h1>
             <p className="lede">
-              Grief, loneliness, anxiety, and the nights that feel too long. Sit a while. The light is on.
+              Just get through this hour, and then the next one. Honest company for grief, loneliness, and the nights
+              that feel too long.
             </p>
             <div className="hero-actions">
               <Link href="/book/sample" className="btn">
