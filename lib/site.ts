@@ -23,31 +23,32 @@ export const categories = ["Grief", "Loneliness", "Anxiety", "Difficult Nights",
 
 // Book chapters live in the same table as posts but are never shown on the public blog.
 // The one chapter anyone can read for free.
-export const sampleChapterSlug = "chapter-01-midnight-is-a-different-country";
+export const sampleChapterSlug = "chapter-01-when-the-night-gets-long";
 
 export const bookChapterCategory = "Book chapter";
 
 export const book = {
   title: "Not Alone at Midnight",
-  subtitle: "Company for the hours when everything feels louder",
+  subtitle: "Companionship for the hours when life feels heavier",
+  tagline: "A Long Night Survival Guide",
   // Change status/date when you have real news. These are shown on /book and the home page.
   status: "Available now",
   statusLine: "$12 for the PDF, delivered instantly. Chapter 1 is free to read first, with no strings. Join the list if you would like to hear about new essays.",
   price: "$12",
   buyUrl: "https://buy.stripe.com/28E9AM9C81M4g9877y8og0a",
-  pullQuote: "You don't have to solve tonight. You just have to get through this hour, and then the next one.",
+  pullQuote: "You do not have to solve your entire life tonight. You only have to be here for this moment.",
   chapters: [
-    "Midnight Is a Different Country",
-    "The 2 a.m. Spiral",
-    "When Sleep Won't Come",
-    "Being Alone During Holidays and Milestones",
-    "What Helps in the Middle of the Night",
-    "What Not to Tell Yourself at Night",
+    "When the Night Gets Long",
+    "When Life No Longer Feels Familiar",
+    "Learning to Live With the Space They Left",
+    "The Difference Between Being Alone and Feeling Alone",
+    "The Things We Carry",
+    "The Weight of the Quiet",
     "The Next Morning",
-    "Small Comforts That Carry You Through",
-    "When You Feel the World Is Moving Without You",
-    "Moving Through the Body",
-    "Finding Stillness in Motion",
+    "When the Mind Will Not Let Go",
+    "When the World Keeps Moving",
+    "The Days That Feel Like Setbacks",
+    "Learning to Live With What Has Changed",
     "The Power of Presence",
     "Navigating Emotional Currents",
     "Embracing Stillness and Pause",

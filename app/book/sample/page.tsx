@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Read Chapter 1 free",
-  description: "A free sample from Not Alone at Midnight: Chapter 1, Midnight Is a Different Country.",
+  description: "A free sample from Not Alone at Midnight: Chapter 1, When the Night Gets Long.",
 };
 
 export default async function SamplePage() {
