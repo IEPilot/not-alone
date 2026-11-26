@@ -52,6 +52,10 @@ export default function BookPage() {
                 Read Chapter 1 free
               </Link>
             </div>
+            <p className="muted" style={{ marginTop: "1.4rem", fontSize: "0.95rem" }}>
+              Money tight right now? <Link href="/contact">Send me a note</Link> and I will send you a copy, free. No
+              questions asked.
+            </p>
           </div>
         </div>
       </section>
