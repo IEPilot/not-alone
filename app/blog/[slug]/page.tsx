@@ -36,7 +36,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
     description: post.excerpt,
     datePublished: post.published_at,
     dateModified: post.updated_at,
-    author: { "@type": "Person", name: site.author },
+    author: { "@type": "Person", name: site.authorFullName },
     publisher: { "@type": "Organization", name: site.name },
     mainEntityOfPage: `${site.url}/blog/${post.slug}`,
   };

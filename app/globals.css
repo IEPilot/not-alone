@@ -1325,3 +1325,11 @@ body.is-scrolled .site-header {
   color: var(--paper-red);
   margin: 0;
 }
+
+/* Book byline, under the title on the book page */
+.book-byline {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--amber-bright);
+  margin: 0 0 1.4rem;
+}

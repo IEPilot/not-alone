@@ -6,7 +6,9 @@ export const site = {
   description:
     "A quiet place for people carrying grief, loneliness, anxiety, or a difficult night. Reflections, a book, and gentle resources. You do not have to be awake alone.",
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
-  author: "Brian",
+  author: "Brian", // how posts and emails are signed
+  authorFullName: "Brian Luciani", // the book's byline
+  publisher: "Monarch Forge Studio",
   contactEmail: "", // optional: shown on the contact page if you fill it in
 };
 

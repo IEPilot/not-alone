@@ -44,7 +44,9 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} {site.name}</span>
+          <span>
+            © {new Date().getFullYear()} {site.name} · A {site.publisher} project
+          </span>
           <span>Not a substitute for professional care.</span>
         </div>
       </div>
