@@ -38,7 +38,7 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
       size: [432, 648], // 6 x 9 inches
       margins: { top: 64, bottom: 72, left: 56, right: 56 },
       bufferPages: true,
-      info: { Title: book.title, Author: site.author, Subject: book.subtitle },
+      info: { Title: book.title, Author: site.authorFullName, Subject: book.subtitle, Creator: site.publisher },
     });
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -90,7 +90,7 @@ export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
       lineGap: 4,
     });
     doc.fillColor(SOFT).font("Mono").fontSize(8).text(
-      `© ${new Date().getFullYear()} ${site.author}. For your personal use. Please do not share or resell this file.`,
+      `© ${new Date().getFullYear()} ${site.authorFullName}. Published by ${site.publisher}. For your personal use. Please do not share or resell this file.`,
       56,
       H - 90,
       { width: contentW, lineGap: 3 },

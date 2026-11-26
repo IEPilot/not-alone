@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BookCoverArt } from "@/components/Hero";
 import Newsletter from "@/components/Newsletter";
-import { book } from "@/lib/site";
+import { book, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "The Book",
@@ -29,7 +29,10 @@ export default function BookPage() {
           </div>
           <div>
             <p className="eyebrow">The book · {book.status}</p>
-            <h1 id="book-h1">{book.title}</h1>
+            <h1 id="book-h1" style={{ marginBottom: "0.4rem" }}>
+              {book.title}
+            </h1>
+            <p className="book-byline">by {site.authorFullName}</p>
             <p className="lede">
               <strong>{book.tagline}.</strong> {book.subtitle}.
             </p>

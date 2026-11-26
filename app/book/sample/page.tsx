@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Newsletter from "@/components/Newsletter";
 import { getBookChapter } from "@/lib/store";
 import { readingMinutes, renderMarkdown } from "@/lib/markdown";
-import { book, sampleChapterSlug } from "@/lib/site";
+import { book, sampleChapterSlug, site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ export default async function SamplePage() {
         <p className="eyebrow">Free sample · Chapter 1 of {book.chapters.length}</p>
         <h1>{chapter.title}</h1>
         <p className="mono muted" style={{ fontSize: "0.8rem", letterSpacing: "0.06em" }}>
-          From {book.title} · {readingMinutes(chapter.body)} min read
+          From {book.title} by {site.authorFullName} · {readingMinutes(chapter.body)} min read
         </p>
       </header>
 
