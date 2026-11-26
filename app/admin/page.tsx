@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/auth";
-import { backendName, listMessages, listPosts, listSubscribers } from "@/lib/store";
+import { backendName, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
 import { formatDate } from "@/lib/markdown";
 import { bookChapterCategory } from "@/lib/site";
-import { deletePostAction, login, logout, togglePublishAction } from "./actions";
+import { deletePostAction, login, logout, noteAction, togglePublishAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +43,14 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
     );
   }
 
-  const [allPosts, subs, msgs] = await Promise.all([listPosts({ includeDrafts: true }), listSubscribers(), listMessages()]);
+  const [allPosts, subs, msgs, notes] = await Promise.all([
+    listPosts({ includeDrafts: true }),
+    listSubscribers(),
+    listMessages(),
+    listNotes(),
+  ]);
+  const pendingNotes = notes.filter((n) => n.status === "pending");
+  const otherNotes = notes.filter((n) => n.status !== "pending").slice(0, 30);
   const posts = allPosts.filter((p) => p.category !== bookChapterCategory);
   const chapters = allPosts.filter((p) => p.category === bookChapterCategory).sort((a, b) => a.slug.localeCompare(b.slug));
   const active = subs.filter((s) => !s.unsubscribed_at);
@@ -196,6 +203,46 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
             )}
           </tbody>
         </table>
+      </div>
+
+      <h2 id="notes" style={{ marginTop: "4rem" }}>
+        Notes wall{" "}
+        <span className="muted mono" style={{ fontSize: "0.9rem" }}>
+          ({pendingNotes.length} waiting)
+        </span>
+      </h2>
+      <p className="muted">
+        New notes wait here until you approve them. Approved notes show on <Link href="/notes">/notes</Link>. Hiding a
+        note takes it off the wall but keeps it here.
+      </p>
+      {notes.length === 0 && <p className="muted">No notes yet.</p>}
+      <div className="resource-list">
+        {[...pendingNotes, ...otherNotes].map((n) => (
+          <div key={n.id} className="resource">
+            <p className="muted mono" style={{ fontSize: "0.75rem", marginBottom: "0.6rem" }}>
+              <span className={`badge ${n.status === "approved" ? "badge--live" : ""}`}>{n.status}</span>{" "}
+              {formatDate(n.created_at)}
+              {n.place ? ` · ${n.place}` : ""}
+            </p>
+            <p style={{ whiteSpace: "pre-wrap", color: "var(--text)", marginBottom: "0.9rem" }}>{n.body}</p>
+            <form action={noteAction} className="row-actions">
+              <input type="hidden" name="id" value={n.id} />
+              {n.status !== "approved" && (
+                <button className="btn" name="action" value="approve">
+                  Approve
+                </button>
+              )}
+              {n.status !== "hidden" && (
+                <button className="btn btn--ghost" name="action" value="hide">
+                  Hide
+                </button>
+              )}
+              <button className="btn btn--danger" name="action" value="delete">
+                Delete
+              </button>
+            </form>
+          </div>
+        ))}
       </div>
 
       <h2 style={{ marginTop: "4rem" }}>Messages</h2>

@@ -1279,3 +1279,49 @@ body.is-scrolled .site-header {
 @media (max-width: 820px) {
   .nav { background: #181c22; border-color: #2b3139; }
 }
+
+/* ---------- Notes from the night ---------- */
+.notes-head {
+  display: grid;
+  grid-template-columns: 1.1fr minmax(0, 440px);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .notes-head { grid-template-columns: 1fr; }
+}
+.notes-form-wrap .note-form textarea { min-height: 7rem; }
+.notes-wall {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 1.6rem;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.5));
+}
+.note {
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 1.9rem, var(--paper-line) 1.9rem, var(--paper-line) calc(1.9rem + 1px));
+  background-position: 0 1.1rem;
+  padding: 1.3rem 1.3rem 1.1rem;
+  clip-path: polygon(0 3px, 18% 0, 41% 4px, 63% 1px, 84% 4px, 100% 1px, 100% calc(100% - 3px), 77% 100%, 52% calc(100% - 4px), 29% calc(100% - 1px), 9% calc(100% - 4px), 0 100%);
+  transform: rotate(-0.8deg);
+}
+.notes-wall .note:nth-child(even) { transform: rotate(0.9deg) translateY(0.4rem); }
+.notes-wall .note:nth-child(3n) { transform: rotate(-0.3deg); }
+.note-body {
+  font-family: "Caveat", "Segoe Script", cursive;
+  font-weight: 600;
+  font-size: 1.55rem;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 0.8rem;
+  overflow-wrap: anywhere;
+}
+.note-meta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--paper-red);
+  margin: 0;
+}

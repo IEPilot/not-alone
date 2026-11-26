@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, endSession, requireAdmin, startSession, adminConfigured } from "@/lib/auth";
-import { deletePost, getPostById, savePost } from "@/lib/store";
+import { deleteNote, deletePost, getPostById, savePost, setNoteStatus } from "@/lib/store";
 import { slugify } from "@/lib/markdown";
 import { categories, bookChapterCategory } from "@/lib/site";
 import { tooMany } from "@/lib/rateLimit";
@@ -88,4 +88,17 @@ export async function togglePublishAction(formData: FormData) {
     revalidateAll();
   }
   redirect("/admin");
+}
+
+export async function noteAction(formData: FormData) {
+  requireAdmin();
+  const id = String(formData.get("id") || "");
+  const action = String(formData.get("action") || "");
+  if (id) {
+    if (action === "approve") await setNoteStatus(id, "approved");
+    else if (action === "hide") await setNoteStatus(id, "hidden");
+    else if (action === "delete") await deleteNote(id);
+  }
+  revalidatePath("/notes");
+  redirect("/admin#notes");
 }

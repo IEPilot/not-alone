@@ -34,10 +34,22 @@ create table if not exists public.nam_messages (
   created_at timestamptz not null default now()
 );
 
+-- Short anonymous notes for the "Notes from the night" wall. Nothing shows publicly until it is approved.
+create table if not exists public.nam_notes (
+  id uuid primary key default gen_random_uuid(),
+  body text not null,
+  place text not null default '',
+  status text not null default 'pending' check (status in ('pending', 'approved', 'hidden')),
+  created_at timestamptz not null default now()
+);
+
 -- The site talks to the database only from the server using the service role key.
 -- Turning on row level security with no public policies means the public (anon) key can read or write nothing.
 alter table public.nam_posts enable row level security;
 alter table public.nam_subscribers enable row level security;
 alter table public.nam_messages enable row level security;
+alter table public.nam_notes enable row level security;
 
 create index if not exists nam_posts_status_published_idx on public.nam_posts (status, published_at desc);
+
+create index if not exists nam_notes_status_created_idx on public.nam_notes (status, created_at desc);
