@@ -37,7 +37,10 @@ type Subscriber = {
 
 type Message = { id: string; name: string; email: string; message: string; created_at: string };
 
-type LocalDb = { posts: Post[]; subscribers: Subscriber[]; messages: Message[] };
+export type NoteStatus = "pending" | "approved" | "hidden";
+export type Note = { id: string; body: string; place: string; status: NoteStatus; created_at: string };
+
+type LocalDb = { posts: Post[]; subscribers: Subscriber[]; messages: Message[]; notes?: Note[] };
 
 const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 export const backendName = hasSupabase ? "supabase" : "local";
@@ -288,6 +291,58 @@ export async function listMessages(): Promise<Message[]> {
   }
   const db = await readLocal();
   return [...db.messages].reverse();
+}
+
+/* ---------------------------------- notes ---------------------------------- */
+
+export async function addNote(n: { body: string; place: string }): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_notes").insert({ ...n, status: "pending" });
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  db.notes = db.notes || [];
+  db.notes.push({ id: randomUUID(), ...n, status: "pending", created_at: new Date().toISOString() });
+  await writeLocal(db);
+}
+
+// Public wall: approved notes only. Admin: everything, newest first.
+export async function listNotes(opts: { approvedOnly?: boolean; limit?: number } = {}): Promise<Note[]> {
+  const limit = opts.limit ?? 200;
+  if (hasSupabase) {
+    let q = sb().from("nam_notes").select("*").order("created_at", { ascending: false }).limit(limit);
+    if (opts.approvedOnly) q = q.eq("status", "approved");
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data || []) as Note[];
+  }
+  const db = await readLocal();
+  const notes = (db.notes || []).filter((n) => !opts.approvedOnly || n.status === "approved");
+  return [...notes].reverse().slice(0, limit);
+}
+
+export async function setNoteStatus(id: string, status: NoteStatus): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_notes").update({ status }).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  const n = (db.notes || []).find((x) => x.id === id);
+  if (n) n.status = status;
+  await writeLocal(db);
+}
+
+export async function deleteNote(id: string): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_notes").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  db.notes = (db.notes || []).filter((x) => x.id !== id);
+  await writeLocal(db);
 }
 
 export function storageIsWritable(): boolean {
