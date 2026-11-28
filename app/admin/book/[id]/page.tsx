@@ -21,8 +21,8 @@ export default async function EditChapter({
 
   return (
     <div className="narrow" style={{ maxWidth: 860 }}>
-      <Link href="/admin#book" className="back-link">
-        ← Back to your desk
+      <Link href="/admin/book" className="back-link">
+        ← Back to the book
       </Link>
       <p className="eyebrow">{isOld ? "Book chapter · first version (backup)" : "Book chapter"}</p>
       <h1 style={{ fontSize: "2rem" }}>{chapter.title}</h1>
