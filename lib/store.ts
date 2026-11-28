@@ -386,7 +386,7 @@ export async function addNote(n: { body: string; place: string; member_id: strin
 export async function listNotes(opts: { approvedOnly?: boolean; limit?: number } = {}): Promise<Note[]> {
   const limit = opts.limit ?? 200;
   if (hasSupabase) {
-    let q = sb().from("nam_notes").select("*, nam_members(username)").order("created_at", { ascending: false }).limit(limit);
+    let q = sb().from("nam_notes").select("*, nam_members!nam_notes_member_id_fkey(username)").order("created_at", { ascending: false }).limit(limit);
     if (opts.approvedOnly) q = q.eq("status", "approved");
     const { data, error } = await q;
     if (error) throw new Error(error.message);
