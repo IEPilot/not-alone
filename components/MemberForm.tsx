@@ -12,12 +12,13 @@ function Submit({ label, busy }: { label: string; busy: string }) {
   );
 }
 
-export default function MemberForm({ mode }: { mode: "join" | "signin" }) {
+export default function MemberForm({ mode, next = "" }: { mode: "join" | "signin"; next?: string }) {
   const [state, action] = useFormState<FormState, FormData>(mode === "join" ? signUp : signIn, null);
   const id = (s: string) => `${mode}-${s}`;
 
   return (
     <form action={action} className="member-form">
+      {next && <input type="hidden" name="next" value={next} />}
       <div className="field">
         <label htmlFor={id("username")}>Username</label>
         <input

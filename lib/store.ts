@@ -45,6 +45,7 @@ export type Note = {
   member_id: string | null;
   show_name: boolean;
   reports: number;
+  post_id: string | null; // set when this is a comment on a blog post; null for the notes wall
   username: string | null; // the author's username, filled in when listing
   created_at: string;
 };
@@ -370,7 +371,14 @@ function withUsername(r: NoteRow): Note {
   return { ...rest, username: nam_members?.username ?? null };
 }
 
-export async function addNote(n: { body: string; place: string; member_id: string; show_name: boolean; status: NoteStatus }): Promise<void> {
+export async function addNote(n: {
+  body: string;
+  place: string;
+  member_id: string;
+  show_name: boolean;
+  status: NoteStatus;
+  post_id?: string | null;
+}): Promise<void> {
   if (hasSupabase) {
     const { error } = await sb().from("nam_notes").insert(n);
     if (error) throw new Error(error.message);
@@ -378,25 +386,42 @@ export async function addNote(n: { body: string; place: string; member_id: strin
   }
   const db = await readLocal();
   db.notes = db.notes || [];
-  db.notes.push({ id: randomUUID(), ...n, reports: 0, username: null, created_at: new Date().toISOString() });
+  db.notes.push({ id: randomUUID(), ...n, post_id: n.post_id ?? null, reports: 0, username: null, created_at: new Date().toISOString() });
   await writeLocal(db);
 }
 
 // Public wall: approved notes only. Admin: everything, newest first.
-export async function listNotes(opts: { approvedOnly?: boolean; limit?: number } = {}): Promise<Note[]> {
+// "wall" is the notes wall only, "comments" is blog comments only, "all" is both.
+// With postId: that post's comments, oldest first, so a conversation reads top to bottom.
+export async function listNotes(
+  opts: { approvedOnly?: boolean; limit?: number; scope?: "wall" | "comments" | "all"; postId?: string } = {},
+): Promise<Note[]> {
   const limit = opts.limit ?? 200;
+  const scope = opts.postId ? "comments" : opts.scope ?? "wall";
+  const oldestFirst = Boolean(opts.postId);
   if (hasSupabase) {
-    let q = sb().from("nam_notes").select("*, nam_members!nam_notes_member_id_fkey(username)").order("created_at", { ascending: false }).limit(limit);
+    let q = sb()
+      .from("nam_notes")
+      .select("*, nam_members!nam_notes_member_id_fkey(username)")
+      .order("created_at", { ascending: oldestFirst })
+      .limit(limit);
     if (opts.approvedOnly) q = q.eq("status", "approved");
+    if (opts.postId) q = q.eq("post_id", opts.postId);
+    else if (scope === "wall") q = q.is("post_id", null);
+    else if (scope === "comments") q = q.not("post_id", "is", null);
     const { data, error } = await q;
     if (error) throw new Error(error.message);
     return ((data || []) as NoteRow[]).map(withUsername);
   }
   const db = await readLocal();
   const names = new Map((db.members || []).map((m) => [m.id, m.username]));
-  const notes = (db.notes || []).filter((n) => !opts.approvedOnly || n.status === "approved");
-  return [...notes]
-    .reverse()
+  const notes = (db.notes || [])
+    .map((n) => ({ ...n, post_id: n.post_id ?? null }))
+    .filter((n) => !opts.approvedOnly || n.status === "approved")
+    .filter((n) =>
+      opts.postId ? n.post_id === opts.postId : scope === "wall" ? !n.post_id : scope === "comments" ? Boolean(n.post_id) : true,
+    );
+  return (oldestFirst ? notes : [...notes].reverse())
     .slice(0, limit)
     .map((n) => ({ ...n, username: n.member_id ? names.get(n.member_id) ?? null : null }));
 }

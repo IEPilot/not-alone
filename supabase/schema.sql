@@ -55,6 +55,8 @@ create table if not exists public.nam_notes (
   member_id uuid references public.nam_members (id) on delete set null,
   show_name boolean not null default true,
   reports integer not null default 0,
+  -- Set when the note is a comment on a blog post; null for the notes wall.
+  post_id uuid references public.nam_posts (id) on delete cascade,
   created_at timestamptz not null default now()
 );
 
@@ -92,3 +94,7 @@ alter table public.nam_book_chapters enable row level security;
 create index if not exists nam_posts_status_published_idx on public.nam_posts (status, published_at desc);
 
 create index if not exists nam_notes_status_created_idx on public.nam_notes (status, created_at desc);
+create index if not exists nam_notes_post_created_idx on public.nam_notes (post_id, created_at);
+
+-- Upgrading an existing database for blog comments:
+-- alter table public.nam_notes add column if not exists post_id uuid references public.nam_posts (id) on delete cascade;
