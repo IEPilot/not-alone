@@ -24,11 +24,10 @@ export const nav = [
 
 export const categories = ["Grief", "Loneliness", "Anxiety", "Difficult Nights", "Holidays", "Hope"];
 
-// Book chapters live in the same table as posts but are never shown on the public blog.
+// Book chapters live in their own private table (nam_book_chapters), never alongside blog posts,
+// so a chapter can never be published to the blog by accident.
 // The one chapter anyone can read for free.
 export const sampleChapterSlug = "chapter-01-when-the-night-gets-long";
-
-export const bookChapterCategory = "Book chapter";
 
 export const book = {
   title: "Not Alone at Midnight",
