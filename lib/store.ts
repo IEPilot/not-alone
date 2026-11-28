@@ -6,7 +6,6 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
-import { bookChapterCategory } from "@/lib/site";
 // @ts-ignore - plain JS module shared with the seed script
 import { seedPosts } from "@/content/seed-posts.mjs";
 
@@ -40,7 +39,20 @@ type Message = { id: string; name: string; email: string; message: string; creat
 export type NoteStatus = "pending" | "approved" | "hidden";
 export type Note = { id: string; body: string; place: string; status: NoteStatus; created_at: string };
 
-type LocalDb = { posts: Post[]; subscribers: Subscriber[]; messages: Message[]; notes?: Note[] };
+// Book chapters are kept apart from blog posts. "current" is the book buyers get; "old" is the first version, kept as a backup.
+export type ChapterVersion = "current" | "old";
+export type BookChapter = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  version: ChapterVersion;
+  created_at: string;
+  updated_at: string;
+};
+
+type LocalDb = { posts: Post[]; subscribers: Subscriber[]; messages: Message[]; notes?: Note[]; chapters?: BookChapter[] };
 
 const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 export const backendName = hasSupabase ? "supabase" : "local";
@@ -102,49 +114,75 @@ const byNewest = (a: Post, b: Post) =>
 export async function listPosts(opts: { includeDrafts?: boolean } = {}): Promise<Post[]> {
   if (hasSupabase) {
     let q = sb().from("nam_posts").select("*");
-    if (!opts.includeDrafts) q = q.eq("status", "published").neq("category", bookChapterCategory);
+    if (!opts.includeDrafts) q = q.eq("status", "published");
     const { data, error } = await q;
     if (error) throw new Error(error.message);
     return ((data || []) as Post[]).sort(byNewest);
   }
   const db = await readLocal();
-  const posts = opts.includeDrafts ? db.posts : db.posts.filter((p) => p.status === "published" && p.category !== bookChapterCategory);
+  const posts = opts.includeDrafts ? db.posts : db.posts.filter((p) => p.status === "published");
   return [...posts].sort(byNewest);
 }
 
 export async function getPostBySlug(slug: string, opts: { includeDrafts?: boolean } = {}): Promise<Post | null> {
   if (hasSupabase) {
     let q = sb().from("nam_posts").select("*").eq("slug", slug);
-    if (!opts.includeDrafts) q = q.eq("status", "published").neq("category", bookChapterCategory);
+    if (!opts.includeDrafts) q = q.eq("status", "published");
     const { data, error } = await q.maybeSingle();
     if (error) throw new Error(error.message);
     return (data as Post) || null;
   }
   const db = await readLocal();
   const p = db.posts.find((x) => x.slug === slug);
-  if (!p || (!opts.includeDrafts && (p.status !== "published" || p.category === bookChapterCategory))) return null;
+  if (!p || (!opts.includeDrafts && p.status !== "published")) return null;
   return p;
 }
 
-// Fetches one book chapter by its exact slug, whatever its status. Callers decide which chapters are public.
-export async function getBookChapter(slug: string): Promise<Post | null> {
+/* ------------------------------ book chapters ------------------------------ */
+
+// One current chapter by its exact slug (used for the free sample). Callers decide what is public.
+export async function getBookChapter(slug: string): Promise<BookChapter | null> {
   if (hasSupabase) {
-    const { data, error } = await sb().from("nam_posts").select("*").eq("slug", slug).eq("category", bookChapterCategory).maybeSingle();
+    const { data, error } = await sb().from("nam_book_chapters").select("*").eq("slug", slug).eq("version", "current").maybeSingle();
     if (error) throw new Error(error.message);
-    return (data as Post) || null;
+    return (data as BookChapter) || null;
   }
   const db = await readLocal();
-  return db.posts.find((x) => x.slug === slug && x.category === bookChapterCategory) || null;
+  return (db.chapters || []).find((c) => c.slug === slug && c.version === "current") || null;
 }
 
-export async function listBookChapters(): Promise<Post[]> {
+export async function listBookChapters(version: ChapterVersion = "current"): Promise<BookChapter[]> {
   if (hasSupabase) {
-    const { data, error } = await sb().from("nam_posts").select("*").eq("category", bookChapterCategory).order("slug", { ascending: true });
+    const { data, error } = await sb().from("nam_book_chapters").select("*").eq("version", version).order("slug", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data || []) as Post[];
+    return (data || []) as BookChapter[];
   }
   const db = await readLocal();
-  return db.posts.filter((x) => x.category === bookChapterCategory).sort((a, b) => a.slug.localeCompare(b.slug));
+  return (db.chapters || []).filter((c) => c.version === version).sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
+export async function getBookChapterById(id: string): Promise<BookChapter | null> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_book_chapters").select("*").eq("id", id).maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as BookChapter) || null;
+  }
+  const db = await readLocal();
+  return (db.chapters || []).find((c) => c.id === id) || null;
+}
+
+// Saves a chapter's words. There is deliberately no way to publish a chapter or turn it into a post.
+export async function saveBookChapter(id: string, input: { title: string; excerpt: string; body: string }): Promise<void> {
+  const row = { ...input, updated_at: new Date().toISOString() };
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_book_chapters").update(row).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  const c = (db.chapters || []).find((x) => x.id === id);
+  if (c) Object.assign(c, row);
+  await writeLocal(db);
 }
 
 export async function getPostById(id: string): Promise<Post | null> {

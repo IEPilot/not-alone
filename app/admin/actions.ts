@@ -3,9 +3,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, endSession, requireAdmin, startSession, adminConfigured } from "@/lib/auth";
-import { deleteNote, deletePost, getPostById, savePost, setNoteStatus } from "@/lib/store";
+import { deleteNote, deletePost, getBookChapterById, getPostById, saveBookChapter, savePost, setNoteStatus } from "@/lib/store";
 import { slugify } from "@/lib/markdown";
-import { categories, bookChapterCategory } from "@/lib/site";
+import { categories } from "@/lib/site";
 import { tooMany } from "@/lib/rateLimit";
 
 export async function login(formData: FormData) {
@@ -40,7 +40,7 @@ export async function savePostAction(formData: FormData) {
   if (!title) redirect(`/admin/${id ?? "new"}?error=${encodeURIComponent("Please give the post a title.")}`);
 
   const slug = slugify(String(formData.get("slug") || "") || title) || "untitled";
-  const category = [...categories, bookChapterCategory].includes(String(formData.get("category"))) ? String(formData.get("category")) : "Hope";
+  const category = categories.includes(String(formData.get("category"))) ? String(formData.get("category")) : "Hope";
   const excerpt = String(formData.get("excerpt") || "").trim().slice(0, 400);
   const featured = formData.get("featured") === "on";
 
@@ -101,4 +101,20 @@ export async function noteAction(formData: FormData) {
   }
   revalidatePath("/notes");
   redirect("/admin#notes");
+}
+
+export async function saveChapterAction(formData: FormData) {
+  requireAdmin();
+  const id = String(formData.get("id") || "");
+  const chapter = id ? await getBookChapterById(id) : null;
+  if (!chapter) redirect("/admin#book");
+  const title = String(formData.get("title") || "").trim();
+  if (!title) redirect(`/admin/book/${id}?error=${encodeURIComponent("Please give the chapter a title.")}`);
+  await saveBookChapter(id, {
+    title,
+    excerpt: String(formData.get("excerpt") || "").trim().slice(0, 400),
+    body: String(formData.get("body") || ""),
+  });
+  revalidatePath("/book/sample");
+  redirect(`/admin/book/${id}?saved=1`);
 }

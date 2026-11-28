@@ -4,7 +4,7 @@ import "server-only";
 import PDFDocument from "pdfkit";
 import path from "path";
 import { book, site } from "@/lib/site";
-import type { Post } from "@/lib/store";
+import type { BookChapter } from "@/lib/store";
 
 const F = (name: string) => path.join(process.cwd(), "assets", "fonts", name);
 const INK = "#1d2126";
@@ -32,7 +32,7 @@ const font = (r: Run) => (r.bold ? (r.italic ? "BoldItalic" : "Bold") : r.italic
 // The opening note ("chapter-00-...") is printed before the numbered chapters, without a number.
 const isOpeningNote = (slug: string) => slug.startsWith("chapter-00-");
 
-export function buildBookPdf(chapters: Post[]): Promise<Buffer> {
+export function buildBookPdf(chapters: BookChapter[]): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: [432, 648], // 6 x 9 inches

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/auth";
-import { backendName, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
+import { backendName, listBookChapters, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
 import { formatDate } from "@/lib/markdown";
-import { bookChapterCategory } from "@/lib/site";
 import { deletePostAction, login, logout, noteAction, togglePublishAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -43,16 +42,17 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
     );
   }
 
-  const [allPosts, subs, msgs, notes] = await Promise.all([
+  const [allPosts, subs, msgs, notes, chapters, oldChapters] = await Promise.all([
     listPosts({ includeDrafts: true }),
     listSubscribers(),
     listMessages(),
     listNotes(),
+    listBookChapters("current"),
+    listBookChapters("old"),
   ]);
   const pendingNotes = notes.filter((n) => n.status === "pending");
   const otherNotes = notes.filter((n) => n.status !== "pending").slice(0, 30);
-  const posts = allPosts.filter((p) => p.category !== bookChapterCategory);
-  const chapters = allPosts.filter((p) => p.category === bookChapterCategory).sort((a, b) => a.slug.localeCompare(b.slug));
+  const posts = allPosts;
   const active = subs.filter((s) => !s.unsubscribed_at);
 
   return (
@@ -146,21 +146,37 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
         </table>
       </div>
 
-      <details style={{ marginTop: "3rem" }}>
+      <details id="book" style={{ marginTop: "3rem" }}>
         <summary style={{ cursor: "pointer", fontWeight: 700 }}>
-          The book: {chapters.length} chapters <span className="muted">(private, not part of the blog)</span>
+          The book: opening note + {chapters.filter((c) => !c.slug.startsWith("chapter-00-")).length} chapters{" "}
+          <span className="muted">(private, kept separate from the blog)</span>
         </summary>
         <p className="muted" style={{ marginTop: "0.8rem" }}>
-          These are the book&apos;s chapters. Only the PDF buyers receive, plus the free Chapter 1 sample, shows them.
-          They never appear on the blog.
+          The book lives in its own private storage, apart from your blog posts, so a chapter can never be published
+          by accident. Only PDF buyers see it, plus the free Chapter 1 sample. You can fix typos here; there is no
+          publish button.
         </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {chapters.map((c) => (
             <li key={c.id} style={{ padding: "0.35rem 0" }}>
-              <Link href={`/admin/${c.id}`}>{c.title}</Link>
+              <Link href={`/admin/book/${c.id}`}>{c.title}</Link>
             </li>
           ))}
         </ul>
+        {oldChapters.length > 0 && (
+          <details style={{ marginTop: "1.2rem" }}>
+            <summary style={{ cursor: "pointer" }} className="muted">
+              First version of the book ({oldChapters.length} chapters, backup only)
+            </summary>
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {oldChapters.map((c) => (
+                <li key={c.id} style={{ padding: "0.35rem 0" }}>
+                  <Link href={`/admin/book/${c.id}`}>{c.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </details>
 
       <h2 style={{ marginTop: "4rem" }}>
