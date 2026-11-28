@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkNote, checkUsername } from "@/lib/moderation";
 import { currentMemberId, endMemberSession, hashPassword, startMemberSession, verifyPassword } from "@/lib/members";
-import { addNote, createMember, getMemberById, getMemberByUsername, getPostById, reportNote, setNoteStatus, storageIsWritable } from "@/lib/store";
+import { addNote, createMember, deleteNote, getNoteById, getMemberById, getMemberByUsername, getPostById, reportNote, setNoteStatus, storageIsWritable } from "@/lib/store";
 import { tooMany } from "@/lib/rateLimit";
 import { safeNext } from "@/lib/safeNext";
 
@@ -135,4 +135,19 @@ export async function reportNoteAction(formData: FormData) {
     revalidatePath(back.split("?")[0]);
   }
   redirect(back === "/notes" ? "/notes?reported=1#wall" : `${back}?reported=1#comments`);
+}
+
+// Members can delete their own notes and comments, and only their own.
+export async function deleteOwnNoteAction(formData: FormData) {
+  const member = await activeMember();
+  const noteId = String(formData.get("id") || "");
+  const back = safeNext(formData.get("back"), "/notes");
+  if (member && noteId) {
+    const note = await getNoteById(noteId);
+    if (note && note.member_id === member.id) {
+      await deleteNote(noteId);
+      revalidatePath(back);
+    }
+  }
+  redirect(back === "/notes" ? "/notes#wall" : `${back}#comments`);
 }

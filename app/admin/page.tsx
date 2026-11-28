@@ -2,7 +2,8 @@ import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/auth";
 import { backendName, listMembers, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
 import { formatDate } from "@/lib/markdown";
-import { deletePostAction, login, logout, memberAction, noteAction, togglePublishAction } from "./actions";
+import { deleteMessageAction, deletePostAction, login, logout, memberAction, noteAction, togglePublishAction } from "./actions";
+import ConfirmButton from "@/components/ConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -134,9 +135,13 @@ export default async function AdminPage({
                     </form>
                     <form action={deletePostAction}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button className="btn btn--danger" type="submit" aria-label={`Delete ${p.title}`}>
+                      <ConfirmButton
+                        className="btn btn--danger"
+                        aria-label={`Delete ${p.title}`}
+                        confirm={`Delete "${p.title}" for good? This cannot be undone. (To just take it down, use Unpublish.)`}
+                      >
                         Delete
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </div>
                 </td>
@@ -246,9 +251,14 @@ export default async function AdminPage({
                   Hide
                 </button>
               )}
-              <button className="btn btn--danger" name="action" value="delete">
+              <ConfirmButton
+                className="btn btn--danger"
+                name="action"
+                value="delete"
+                confirm={`Delete this ${n.post_id ? "comment" : "note"} for good? (To just take it down, use Hide.)`}
+              >
                 Delete
-              </button>
+              </ConfirmButton>
             </form>
           </div>
         ))}
@@ -301,10 +311,12 @@ export default async function AdminPage({
         </table>
       </div>
 
-      <h2 style={{ marginTop: "4rem" }}>Messages</h2>
+      <h2 id="messages" style={{ marginTop: "4rem" }}>
+        Messages <span className="muted mono" style={{ fontSize: "0.9rem" }}>({msgs.length})</span>
+      </h2>
       {msgs.length === 0 && <p className="muted">No messages yet.</p>}
       <div className="resource-list">
-        {msgs.slice(0, 25).map((m) => (
+        {msgs.slice(0, 50).map((m) => (
           <div key={m.id} className="resource">
             <h3>
               {m.name || "Anonymous"} {m.email && <span className="muted">· {m.email}</span>}
@@ -312,7 +324,16 @@ export default async function AdminPage({
             <p className="muted mono" style={{ fontSize: "0.75rem", marginBottom: "0.6rem" }}>
               {formatDate(m.created_at)}
             </p>
-            <p style={{ whiteSpace: "pre-wrap", color: "var(--text)" }}>{m.message}</p>
+            <p style={{ whiteSpace: "pre-wrap", color: "var(--text)", marginBottom: "0.9rem" }}>{m.message}</p>
+            <form action={deleteMessageAction} className="row-actions">
+              <input type="hidden" name="id" value={m.id} />
+              <ConfirmButton
+                className="btn btn--danger"
+                confirm={`Delete the message from ${m.name || "Anonymous"} for good?`}
+              >
+                Delete
+              </ConfirmButton>
+            </form>
           </div>
         ))}
       </div>

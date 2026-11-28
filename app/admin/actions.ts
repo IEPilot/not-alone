@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, endSession, requireAdmin, startSession, adminConfigured } from "@/lib/auth";
-import { deleteNote, deletePost, getBookChapterById, getMemberById, getPostById, saveBookChapter, savePost, setMemberPassword, setMemberStatus, setNoteStatus } from "@/lib/store";
+import { deleteMessage, deleteNote, deletePost, getBookChapterById, getMemberById, getPostById, saveBookChapter, savePost, setMemberPassword, setMemberStatus, setNoteStatus } from "@/lib/store";
 import { hashPassword, randomTempPassword } from "@/lib/members";
 import { slugify } from "@/lib/markdown";
 import { categories } from "@/lib/site";
@@ -102,6 +102,13 @@ export async function noteAction(formData: FormData) {
   }
   revalidatePath("/notes");
   redirect("/admin#notes");
+}
+
+export async function deleteMessageAction(formData: FormData) {
+  requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (id) await deleteMessage(id);
+  redirect("/admin#messages");
 }
 
 export async function memberAction(formData: FormData) {

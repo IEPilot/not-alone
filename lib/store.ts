@@ -360,6 +360,17 @@ export async function listMessages(): Promise<Message[]> {
   return [...db.messages].reverse();
 }
 
+export async function deleteMessage(id: string): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_messages").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  db.messages = db.messages.filter((m) => m.id !== id);
+  await writeLocal(db);
+}
+
 /* ---------------------------------- notes ---------------------------------- */
 // Notes from members go up right away ("approved"). Notes the automatic checks hold back are "pending"
 // and never shown. "hidden" notes were reported twice, hidden by you, or belong to a blocked member.
@@ -424,6 +435,17 @@ export async function listNotes(
   return (oldestFirst ? notes : [...notes].reverse())
     .slice(0, limit)
     .map((n) => ({ ...n, username: n.member_id ? names.get(n.member_id) ?? null : null }));
+}
+
+export async function getNoteById(id: string): Promise<Note | null> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_notes").select("*").eq("id", id).maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ? ({ ...(data as Note), username: null } as Note) : null;
+  }
+  const db = await readLocal();
+  const n = (db.notes || []).find((x) => x.id === id);
+  return n ? { ...n, post_id: n.post_id ?? null } : null;
 }
 
 export async function setNoteStatus(id: string, status: NoteStatus): Promise<void> {
