@@ -66,6 +66,19 @@ create table if not exists public.nam_note_reports (
   primary key (note_id, member_id)
 );
 
+-- The book's chapters, kept apart from blog posts so they can never be published by accident.
+-- version 'current' is the book buyers get; 'old' keeps the first version as a backup.
+create table if not exists public.nam_book_chapters (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  excerpt text not null default '',
+  body text not null default '',
+  version text not null default 'current' check (version in ('current', 'old')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 -- The site talks to the database only from the server using the service role key.
 -- Turning on row level security with no public policies means the public (anon) key can read or write nothing.
 alter table public.nam_posts enable row level security;
@@ -74,6 +87,7 @@ alter table public.nam_messages enable row level security;
 alter table public.nam_notes enable row level security;
 alter table public.nam_members enable row level security;
 alter table public.nam_note_reports enable row level security;
+alter table public.nam_book_chapters enable row level security;
 
 create index if not exists nam_posts_status_published_idx on public.nam_posts (status, published_at desc);
 
