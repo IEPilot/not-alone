@@ -1385,3 +1385,42 @@ body.is-scrolled .site-header {
 .member-form { margin-top: 1.6rem; }
 .note-report { margin-top: 0.4rem; }
 .note-report .link-button { font-size: 0.78rem; color: var(--ink-soft); }
+
+/* ---------- blog comments ---------- */
+.comments {
+  padding-top: 1rem;
+  padding-bottom: 5rem;
+}
+.comment-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 2.5rem;
+}
+.comment {
+  position: relative;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.comment:first-child {
+  border-top: 1px solid var(--line);
+}
+.comment-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.comment-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.comment-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.comment .note-report {
+  margin-top: 0.4rem;
+}
+.comment-form {
+  margin-top: 1rem;
+}

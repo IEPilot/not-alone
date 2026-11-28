@@ -50,9 +50,10 @@ export default async function AdminPage({
     listPosts({ includeDrafts: true }),
     listSubscribers(),
     listMessages(),
-    listNotes(),
+    listNotes({ scope: "all" }),
     listMembers(),
   ]);
+  const postTitles = new Map(allPosts.map((p) => [p.id, { title: p.title, slug: p.slug }]));
   const heldNotes = notes.filter((n) => n.status === "pending");
   const otherNotes = notes.filter((n) => n.status !== "pending").slice(0, 30);
   const posts = allPosts;
@@ -196,13 +197,15 @@ export default async function AdminPage({
       </div>
 
       <h2 id="notes" style={{ marginTop: "4rem" }}>
-        Notes wall{" "}
+        Notes and comments{" "}
         <span className="muted mono" style={{ fontSize: "0.9rem" }}>
-          ({notes.filter((n) => n.status === "approved").length} on the wall)
+          ({notes.filter((n) => n.status === "approved" && !n.post_id).length} on the wall,{" "}
+          {notes.filter((n) => n.status === "approved" && n.post_id).length} blog comments)
         </span>
       </h2>
       <p className="muted">
-        Members&apos; notes go up on <Link href="/notes">/notes</Link> right away; you do not need to do anything.
+        Members&apos; notes go up on <Link href="/notes">/notes</Link> right away, and their comments go up under
+        your blog posts right away; you do not need to do anything. The same rules cover both.
         Notes with links, phone numbers, emails or slurs are refused automatically. Notes about ending a life or
         self-harm are <strong>held</strong> (never shown), and the writer is pointed to 988 straight away. Two reader
         reports take a note down on its own. Use the buttons only if you want to.
@@ -213,19 +216,29 @@ export default async function AdminPage({
           <div key={n.id} className="resource">
             <p className="muted mono" style={{ fontSize: "0.75rem", marginBottom: "0.6rem" }}>
               <span className={`badge ${n.status === "approved" ? "badge--live" : ""}`}>
-                {n.status === "pending" ? "held" : n.status === "approved" ? "on the wall" : "hidden"}
+                {n.status === "pending" ? "held" : n.status === "approved" ? (n.post_id ? "showing" : "on the wall") : "hidden"}
               </span>{" "}
               {formatDate(n.created_at)} · {n.username ?? "unknown"}
               {n.show_name ? "" : " (posted anonymously)"}
               {n.place ? ` · ${n.place}` : ""}
               {n.reports > 0 ? ` · ${n.reports} report${n.reports === 1 ? "" : "s"}` : ""}
+              {n.post_id && (
+                <>
+                  {" · comment on "}
+                  {postTitles.get(n.post_id) ? (
+                    <Link href={`/blog/${postTitles.get(n.post_id)!.slug}#comments`}>{postTitles.get(n.post_id)!.title}</Link>
+                  ) : (
+                    "a post"
+                  )}
+                </>
+              )}
             </p>
             <p style={{ whiteSpace: "pre-wrap", color: "var(--text)", marginBottom: "0.9rem" }}>{n.body}</p>
             <form action={noteAction} className="row-actions">
               <input type="hidden" name="id" value={n.id} />
               {n.status !== "approved" && (
                 <button className="btn btn--ghost" name="action" value="approve">
-                  Put on the wall
+                  {n.post_id ? "Show it" : "Put on the wall"}
                 </button>
               )}
               {n.status === "approved" && (
@@ -245,7 +258,7 @@ export default async function AdminPage({
         Members <span className="muted mono" style={{ fontSize: "0.9rem" }}>({members.length})</span>
       </h2>
       <p className="muted">
-        Blocking an account takes all of its notes off the wall and stops it posting. A reset gives the member a new
+        Blocking an account takes down all of its notes and comments and stops it posting. A reset gives the member a new
         temporary password, shown to you once, to pass on to them.
       </p>
       {searchParams?.temp && searchParams?.for && (

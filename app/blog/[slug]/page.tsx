@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import CommentForm from "@/components/CommentForm";
 import Newsletter from "@/components/Newsletter";
-import { getPostBySlug, listPosts } from "@/lib/store";
+import { activeMember, reportNoteAction, signOut } from "@/app/notes/actions";
+import { getPostBySlug, listNotes, listPosts } from "@/lib/store";
 import { formatDate, readingMinutes, renderMarkdown } from "@/lib/markdown";
 import { isAdmin } from "@/lib/auth";
 import { site } from "@/lib/site";
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export default async function PostPage({ params, searchParams }: { params: { slug: string }; searchParams: { reported?: string } }) {
   const admin = isAdmin();
   const post = await getPostBySlug(params.slug, { includeDrafts: admin });
   if (!post) notFound();
@@ -28,6 +30,12 @@ export default async function PostPage({ params }: { params: { slug: string } })
   const html = renderMarkdown(post.body);
   const all = await listPosts();
   const others = all.filter((p) => p.id !== post.id).slice(0, 2);
+  const isLive = post.status === "published";
+  const [comments, member] = isLive
+    ? await Promise.all([listNotes({ postId: post.id, approvedOnly: true }), activeMember()])
+    : [[], null];
+  const here = `/blog/${post.slug}`;
+  const nextParam = encodeURIComponent(`${here}#comments`);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -71,6 +79,73 @@ export default async function PostPage({ params }: { params: { slug: string } })
           </p>
         </div>
       </div>
+
+      {isLive && (
+        <section className="narrow comments" id="comments" aria-labelledby="comments-title">
+          <h2 id="comments-title" style={{ fontSize: "1.4rem" }}>
+            {comments.length === 0 ? "Comments" : `${comments.length} comment${comments.length === 1 ? "" : "s"}`}
+          </h2>
+          {searchParams.reported && (
+            <div className="notice" role="status">
+              Thank you. Comments reported by more than one person come down automatically.
+            </div>
+          )}
+          {comments.length > 0 ? (
+            <ol className="comment-list">
+              {comments.map((c) => (
+                <li key={c.id} className="comment">
+                  <p className="comment-meta">
+                    <strong>{c.show_name && c.username ? c.username : "Anonymous"}</strong> · {formatDate(c.created_at)}
+                  </p>
+                  <p className="comment-body">{c.body}</p>
+                  {member && member.id !== c.member_id && (
+                    <form action={reportNoteAction} className="note-report">
+                      <input type="hidden" name="id" value={c.id} />
+                      <input type="hidden" name="back" value={here} />
+                      <button type="submit" className="link-button" aria-label="Report this comment">
+                        Report
+                      </button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="muted">No comments yet. If this one spoke to you, say so. It helps more than you know.</p>
+          )}
+
+          {member ? (
+            <>
+              <div className="member-bar">
+                Commenting as <strong>{member.username}</strong>
+                <form action={signOut} style={{ display: "inline" }}>
+                  <input type="hidden" name="next" value={here} />
+                  <button type="submit" className="link-button">
+                    Sign out
+                  </button>
+                </form>
+              </div>
+              <CommentForm postId={post.id} username={member.username} />
+            </>
+          ) : (
+            <div className="card-plain">
+              <h3 style={{ fontSize: "1.15rem", marginBottom: "0.5rem" }}>Commenting takes a free account</h3>
+              <p className="muted" style={{ marginBottom: "1.2rem" }}>
+                The same one you use on the notes wall. Just a username and password, no email, and you can still
+                comment anonymously.
+              </p>
+              <div className="hero-actions">
+                <Link href={`/notes/join?next=${nextParam}`} className="btn">
+                  Create an account
+                </Link>
+                <Link href={`/notes/sign-in?next=${nextParam}`} className="btn btn--ghost">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="section section--raised">
         <div className="container newsletter">
