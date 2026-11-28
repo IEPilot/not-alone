@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CommentForm from "@/components/CommentForm";
+import ConfirmButton from "@/components/ConfirmButton";
 import Newsletter from "@/components/Newsletter";
-import { activeMember, reportNoteAction, signOut } from "@/app/notes/actions";
+import { activeMember, deleteOwnNoteAction, reportNoteAction, signOut } from "@/app/notes/actions";
 import { getPostBySlug, listNotes, listPosts } from "@/lib/store";
 import { formatDate, readingMinutes, renderMarkdown } from "@/lib/markdown";
 import { isAdmin } from "@/lib/auth";
@@ -105,6 +106,15 @@ export default async function PostPage({ params, searchParams }: { params: { slu
                       <button type="submit" className="link-button" aria-label="Report this comment">
                         Report
                       </button>
+                    </form>
+                  )}
+                  {member && member.id === c.member_id && (
+                    <form action={deleteOwnNoteAction} className="note-report">
+                      <input type="hidden" name="id" value={c.id} />
+                      <input type="hidden" name="back" value={here} />
+                      <ConfirmButton className="link-button" aria-label="Delete my comment" confirm="Delete your comment? This cannot be undone.">
+                        Delete
+                      </ConfirmButton>
                     </form>
                   )}
                 </li>

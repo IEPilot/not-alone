@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ConfirmButton from "@/components/ConfirmButton";
 import NoteForm from "@/components/NoteForm";
 import { listNotes } from "@/lib/store";
-import { activeMember, reportNoteAction, signOut } from "./actions";
+import { activeMember, deleteOwnNoteAction, reportNoteAction, signOut } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,14 @@ export default async function NotesPage({ searchParams }: { searchParams: { repo
                     <button type="submit" className="link-button" aria-label="Report this note">
                       Report
                     </button>
+                  </form>
+                )}
+                {member && member.id === n.member_id && (
+                  <form action={deleteOwnNoteAction} className="note-report">
+                    <input type="hidden" name="id" value={n.id} />
+                    <ConfirmButton className="link-button" aria-label="Delete my note" confirm="Delete your note? This cannot be undone.">
+                      Delete
+                    </ConfirmButton>
                   </form>
                 )}
               </li>
