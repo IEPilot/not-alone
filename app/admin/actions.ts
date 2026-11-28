@@ -125,7 +125,7 @@ export async function saveChapterAction(formData: FormData) {
   requireAdmin();
   const id = String(formData.get("id") || "");
   const chapter = id ? await getBookChapterById(id) : null;
-  if (!chapter) redirect("/admin#book");
+  if (!chapter) redirect("/admin/book");
   const title = String(formData.get("title") || "").trim();
   if (!title) redirect(`/admin/book/${id}?error=${encodeURIComponent("Please give the chapter a title.")}`);
   await saveBookChapter(id, {
