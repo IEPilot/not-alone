@@ -37,7 +37,27 @@ type Subscriber = {
 type Message = { id: string; name: string; email: string; message: string; created_at: string };
 
 export type NoteStatus = "pending" | "approved" | "hidden";
-export type Note = { id: string; body: string; place: string; status: NoteStatus; created_at: string };
+export type Note = {
+  id: string;
+  body: string;
+  place: string;
+  status: NoteStatus;
+  member_id: string | null;
+  show_name: boolean;
+  reports: number;
+  username: string | null; // the author's username, filled in when listing
+  created_at: string;
+};
+
+export type MemberStatus = "active" | "blocked";
+export type Member = {
+  id: string;
+  username: string;
+  username_lc: string;
+  password_hash: string;
+  status: MemberStatus;
+  created_at: string;
+};
 
 // Book chapters are kept apart from blog posts. "current" is the book buyers get; "old" is the first version, kept as a backup.
 export type ChapterVersion = "current" | "old";
@@ -52,7 +72,15 @@ export type BookChapter = {
   updated_at: string;
 };
 
-type LocalDb = { posts: Post[]; subscribers: Subscriber[]; messages: Message[]; notes?: Note[]; chapters?: BookChapter[] };
+type LocalDb = {
+  posts: Post[];
+  subscribers: Subscriber[];
+  messages: Message[];
+  notes?: Note[];
+  members?: Member[];
+  reports?: { note_id: string; member_id: string }[];
+  chapters?: BookChapter[];
+};
 
 const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 export const backendName = hasSupabase ? "supabase" : "local";
@@ -332,16 +360,25 @@ export async function listMessages(): Promise<Message[]> {
 }
 
 /* ---------------------------------- notes ---------------------------------- */
+// Notes from members go up right away ("approved"). Notes the automatic checks hold back are "pending"
+// and never shown. "hidden" notes were reported twice, hidden by you, or belong to a blocked member.
 
-export async function addNote(n: { body: string; place: string }): Promise<void> {
+type NoteRow = Omit<Note, "username"> & { nam_members?: { username: string } | null };
+
+function withUsername(r: NoteRow): Note {
+  const { nam_members, ...rest } = r;
+  return { ...rest, username: nam_members?.username ?? null };
+}
+
+export async function addNote(n: { body: string; place: string; member_id: string; show_name: boolean; status: NoteStatus }): Promise<void> {
   if (hasSupabase) {
-    const { error } = await sb().from("nam_notes").insert({ ...n, status: "pending" });
+    const { error } = await sb().from("nam_notes").insert(n);
     if (error) throw new Error(error.message);
     return;
   }
   const db = await readLocal();
   db.notes = db.notes || [];
-  db.notes.push({ id: randomUUID(), ...n, status: "pending", created_at: new Date().toISOString() });
+  db.notes.push({ id: randomUUID(), ...n, reports: 0, username: null, created_at: new Date().toISOString() });
   await writeLocal(db);
 }
 
@@ -349,15 +386,19 @@ export async function addNote(n: { body: string; place: string }): Promise<void>
 export async function listNotes(opts: { approvedOnly?: boolean; limit?: number } = {}): Promise<Note[]> {
   const limit = opts.limit ?? 200;
   if (hasSupabase) {
-    let q = sb().from("nam_notes").select("*").order("created_at", { ascending: false }).limit(limit);
+    let q = sb().from("nam_notes").select("*, nam_members(username)").order("created_at", { ascending: false }).limit(limit);
     if (opts.approvedOnly) q = q.eq("status", "approved");
     const { data, error } = await q;
     if (error) throw new Error(error.message);
-    return (data || []) as Note[];
+    return ((data || []) as NoteRow[]).map(withUsername);
   }
   const db = await readLocal();
+  const names = new Map((db.members || []).map((m) => [m.id, m.username]));
   const notes = (db.notes || []).filter((n) => !opts.approvedOnly || n.status === "approved");
-  return [...notes].reverse().slice(0, limit);
+  return [...notes]
+    .reverse()
+    .slice(0, limit)
+    .map((n) => ({ ...n, username: n.member_id ? names.get(n.member_id) ?? null : null }));
 }
 
 export async function setNoteStatus(id: string, status: NoteStatus): Promise<void> {
@@ -380,6 +421,104 @@ export async function deleteNote(id: string): Promise<void> {
   }
   const db = await readLocal();
   db.notes = (db.notes || []).filter((x) => x.id !== id);
+  await writeLocal(db);
+}
+
+// One report per member per note. Returns the note's new report count.
+export async function reportNote(noteId: string, memberId: string): Promise<number> {
+  if (hasSupabase) {
+    const ins = await sb().from("nam_note_reports").insert({ note_id: noteId, member_id: memberId });
+    if (ins.error && ins.error.code !== "23505") throw new Error(ins.error.message);
+    const { count, error } = await sb().from("nam_note_reports").select("*", { count: "exact", head: true }).eq("note_id", noteId);
+    if (error) throw new Error(error.message);
+    await sb().from("nam_notes").update({ reports: count ?? 0 }).eq("id", noteId);
+    return count ?? 0;
+  }
+  const db = await readLocal();
+  db.reports = db.reports || [];
+  if (!db.reports.some((r) => r.note_id === noteId && r.member_id === memberId)) db.reports.push({ note_id: noteId, member_id: memberId });
+  const count = db.reports.filter((r) => r.note_id === noteId).length;
+  const n = (db.notes || []).find((x) => x.id === noteId);
+  if (n) n.reports = count;
+  await writeLocal(db);
+  return count;
+}
+
+/* --------------------------------- members --------------------------------- */
+
+export async function createMember(username: string, password_hash: string): Promise<Member> {
+  if (hasSupabase) {
+    const { data, error } = await sb()
+      .from("nam_members")
+      .insert({ username, username_lc: username.toLowerCase(), password_hash })
+      .select()
+      .single();
+    if (error) throw new Error(error.code === "23505" ? "That username is taken." : error.message);
+    return data as Member;
+  }
+  const db = await readLocal();
+  db.members = db.members || [];
+  if (db.members.some((m) => m.username_lc === username.toLowerCase())) throw new Error("That username is taken.");
+  const m: Member = { id: randomUUID(), username, username_lc: username.toLowerCase(), password_hash, status: "active", created_at: new Date().toISOString() };
+  db.members.push(m);
+  await writeLocal(db);
+  return m;
+}
+
+export async function getMemberByUsername(username: string): Promise<Member | null> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_members").select("*").eq("username_lc", username.toLowerCase()).maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as Member) || null;
+  }
+  const db = await readLocal();
+  return (db.members || []).find((m) => m.username_lc === username.toLowerCase()) || null;
+}
+
+export async function getMemberById(id: string): Promise<Member | null> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_members").select("*").eq("id", id).maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as Member) || null;
+  }
+  const db = await readLocal();
+  return (db.members || []).find((m) => m.id === id) || null;
+}
+
+export async function listMembers(): Promise<Member[]> {
+  if (hasSupabase) {
+    const { data, error } = await sb().from("nam_members").select("*").order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data || []) as Member[];
+  }
+  const db = await readLocal();
+  return [...(db.members || [])].reverse();
+}
+
+// Blocking an account also takes all of its notes off the wall. Unblocking does not put them back.
+export async function setMemberStatus(id: string, status: MemberStatus): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_members").update({ status }).eq("id", id);
+    if (error) throw new Error(error.message);
+    if (status === "blocked") await sb().from("nam_notes").update({ status: "hidden" }).eq("member_id", id);
+    return;
+  }
+  const db = await readLocal();
+  const m = (db.members || []).find((x) => x.id === id);
+  if (m) m.status = status;
+  if (status === "blocked") for (const n of db.notes || []) if (n.member_id === id) n.status = "hidden";
+  await writeLocal(db);
+}
+
+export async function setMemberPassword(id: string, password_hash: string): Promise<void> {
+  if (hasSupabase) {
+    const { error } = await sb().from("nam_members").update({ password_hash }).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = await readLocal();
+  const m = (db.members || []).find((x) => x.id === id);
+  if (m) m.password_hash = password_hash;
   await writeLocal(db);
 }
 

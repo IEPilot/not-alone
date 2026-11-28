@@ -1333,3 +1333,55 @@ body.is-scrolled .site-header {
   color: var(--amber-bright);
   margin: 0 0 1.4rem;
 }
+
+/* ---------- Notes wall: members ---------- */
+.member-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.member-bar strong { color: var(--text-strong); }
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--amber-bright); }
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+.check-label input { width: 1.1rem; height: 1.1rem; accent-color: var(--amber); }
+.card-plain {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1.6rem;
+}
+.notice--crisis {
+  margin-top: 1.2rem;
+  border-color: rgba(229, 168, 80, 0.6);
+  background: linear-gradient(180deg, var(--amber-faint), transparent), var(--surface);
+  color: var(--text-strong);
+}
+.member-form { margin-top: 1.6rem; }
+.note-report { margin-top: 0.4rem; }
+.note-report .link-button { font-size: 0.78rem; color: var(--ink-soft); }

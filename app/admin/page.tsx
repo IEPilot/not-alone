@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/auth";
-import { backendName, listBookChapters, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
+import { backendName, listBookChapters, listMembers, listMessages, listNotes, listPosts, listSubscribers } from "@/lib/store";
 import { formatDate } from "@/lib/markdown";
-import { deletePostAction, login, logout, noteAction, togglePublishAction } from "./actions";
+import { deletePostAction, login, logout, memberAction, noteAction, togglePublishAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,11 @@ const errors: Record<string, string> = {
   setup: "Admin is not set up yet. Add ADMIN_PASSWORD and SESSION_SECRET to your environment variables.",
 };
 
-export default async function AdminPage({ searchParams }: { searchParams: { error?: string; deleted?: string } }) {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: { error?: string; deleted?: string; temp?: string; for?: string };
+}) {
   if (!isAdmin()) {
     return (
       <div className="narrow" style={{ maxWidth: 480 }}>
@@ -42,15 +46,16 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
     );
   }
 
-  const [allPosts, subs, msgs, notes, chapters, oldChapters] = await Promise.all([
+  const [allPosts, subs, msgs, notes, chapters, oldChapters, members] = await Promise.all([
     listPosts({ includeDrafts: true }),
     listSubscribers(),
     listMessages(),
     listNotes(),
     listBookChapters("current"),
     listBookChapters("old"),
+    listMembers(),
   ]);
-  const pendingNotes = notes.filter((n) => n.status === "pending");
+  const heldNotes = notes.filter((n) => n.status === "pending");
   const otherNotes = notes.filter((n) => n.status !== "pending").slice(0, 30);
   const posts = allPosts;
   const active = subs.filter((s) => !s.unsubscribed_at);
@@ -224,31 +229,37 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
       <h2 id="notes" style={{ marginTop: "4rem" }}>
         Notes wall{" "}
         <span className="muted mono" style={{ fontSize: "0.9rem" }}>
-          ({pendingNotes.length} waiting)
+          ({notes.filter((n) => n.status === "approved").length} on the wall)
         </span>
       </h2>
       <p className="muted">
-        New notes wait here until you approve them. Approved notes show on <Link href="/notes">/notes</Link>. Hiding a
-        note takes it off the wall but keeps it here.
+        Members&apos; notes go up on <Link href="/notes">/notes</Link> right away; you do not need to do anything.
+        Notes with links, phone numbers, emails or slurs are refused automatically. Notes about ending a life or
+        self-harm are <strong>held</strong> (never shown), and the writer is pointed to 988 straight away. Two reader
+        reports take a note down on its own. Use the buttons only if you want to.
       </p>
       {notes.length === 0 && <p className="muted">No notes yet.</p>}
       <div className="resource-list">
-        {[...pendingNotes, ...otherNotes].map((n) => (
+        {[...heldNotes, ...otherNotes].map((n) => (
           <div key={n.id} className="resource">
             <p className="muted mono" style={{ fontSize: "0.75rem", marginBottom: "0.6rem" }}>
-              <span className={`badge ${n.status === "approved" ? "badge--live" : ""}`}>{n.status}</span>{" "}
-              {formatDate(n.created_at)}
+              <span className={`badge ${n.status === "approved" ? "badge--live" : ""}`}>
+                {n.status === "pending" ? "held" : n.status === "approved" ? "on the wall" : "hidden"}
+              </span>{" "}
+              {formatDate(n.created_at)} · {n.username ?? "unknown"}
+              {n.show_name ? "" : " (posted anonymously)"}
               {n.place ? ` · ${n.place}` : ""}
+              {n.reports > 0 ? ` · ${n.reports} report${n.reports === 1 ? "" : "s"}` : ""}
             </p>
             <p style={{ whiteSpace: "pre-wrap", color: "var(--text)", marginBottom: "0.9rem" }}>{n.body}</p>
             <form action={noteAction} className="row-actions">
               <input type="hidden" name="id" value={n.id} />
               {n.status !== "approved" && (
-                <button className="btn" name="action" value="approve">
-                  Approve
+                <button className="btn btn--ghost" name="action" value="approve">
+                  Put on the wall
                 </button>
               )}
-              {n.status !== "hidden" && (
+              {n.status === "approved" && (
                 <button className="btn btn--ghost" name="action" value="hide">
                   Hide
                 </button>
@@ -259,6 +270,53 @@ export default async function AdminPage({ searchParams }: { searchParams: { erro
             </form>
           </div>
         ))}
+      </div>
+
+      <h2 id="members" style={{ marginTop: "4rem" }}>
+        Members <span className="muted mono" style={{ fontSize: "0.9rem" }}>({members.length})</span>
+      </h2>
+      <p className="muted">
+        Blocking an account takes all of its notes off the wall and stops it posting. A reset gives the member a new
+        temporary password, shown to you once, to pass on to them.
+      </p>
+      {searchParams?.temp && searchParams?.for && (
+        <div className="notice" role="status">
+          New password for <strong>{searchParams.for}</strong>: <span className="mono">{searchParams.temp}</span>. Pass it
+          on now; it will not be shown again.
+        </div>
+      )}
+      {members.length === 0 && <p className="muted">No members yet.</p>}
+      <div className="table-wrap">
+        <table className="table">
+          <tbody>
+            {members.slice(0, 100).map((m) => (
+              <tr key={m.id}>
+                <td>
+                  {m.username}{" "}
+                  {m.status === "blocked" && <span className="badge">blocked</span>}
+                </td>
+                <td className="muted">joined {formatDate(m.created_at)}</td>
+                <td>
+                  <form action={memberAction} className="row-actions">
+                    <input type="hidden" name="id" value={m.id} />
+                    {m.status === "active" ? (
+                      <button className="btn btn--danger" name="action" value="block">
+                        Block
+                      </button>
+                    ) : (
+                      <button className="btn btn--ghost" name="action" value="unblock">
+                        Unblock
+                      </button>
+                    )}
+                    <button className="btn btn--ghost" name="action" value="reset">
+                      Reset password
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <h2 style={{ marginTop: "4rem" }}>Messages</h2>

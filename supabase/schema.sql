@@ -35,12 +35,35 @@ create table if not exists public.nam_messages (
 );
 
 -- Short anonymous notes for the "Notes from the night" wall. Nothing shows publicly until it is approved.
+-- Members of the notes wall: a username and a scrypt password hash, nothing else.
+create table if not exists public.nam_members (
+  id uuid primary key default gen_random_uuid(),
+  username text not null,
+  username_lc text not null unique,
+  password_hash text not null,
+  status text not null default 'active' check (status in ('active', 'blocked')),
+  created_at timestamptz not null default now()
+);
+
+-- Notes from members go up right away ('approved'). 'pending' notes were held back by the automatic checks
+-- and are never shown; 'hidden' notes were reported, hidden, or belong to a blocked member.
 create table if not exists public.nam_notes (
   id uuid primary key default gen_random_uuid(),
   body text not null,
   place text not null default '',
   status text not null default 'pending' check (status in ('pending', 'approved', 'hidden')),
+  member_id uuid references public.nam_members (id) on delete set null,
+  show_name boolean not null default true,
+  reports integer not null default 0,
   created_at timestamptz not null default now()
+);
+
+-- One report per member per note.
+create table if not exists public.nam_note_reports (
+  note_id uuid not null references public.nam_notes (id) on delete cascade,
+  member_id uuid not null references public.nam_members (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (note_id, member_id)
 );
 
 -- The book's chapters, kept apart from blog posts so they can never be published by accident.
@@ -62,6 +85,8 @@ alter table public.nam_posts enable row level security;
 alter table public.nam_subscribers enable row level security;
 alter table public.nam_messages enable row level security;
 alter table public.nam_notes enable row level security;
+alter table public.nam_members enable row level security;
+alter table public.nam_note_reports enable row level security;
 alter table public.nam_book_chapters enable row level security;
 
 create index if not exists nam_posts_status_published_idx on public.nam_posts (status, published_at desc);

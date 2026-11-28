@@ -64,16 +64,3 @@ export async function notifyContact(m: { name: string; email: string; message: s
   });
 }
 
-// Lets you know a note is waiting for approval on the notes wall.
-export async function notifyNewNote(n: { body: string; place: string }) {
-  const to = process.env.CONTACT_TO_EMAIL;
-  if (!to) return;
-  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
-  const where = n.place ? ` (${n.place})` : "";
-  await send({
-    to,
-    subject: "A new note is waiting for the wall",
-    text: `${n.body}${where}\n\nApprove or hide it in admin: ${site.url}/admin#notes`,
-    html: `<p style="white-space:pre-wrap">${esc(n.body)}${esc(where)}</p><p><a href="${site.url}/admin#notes">Approve or hide it in admin</a></p>`,
-  });
-}

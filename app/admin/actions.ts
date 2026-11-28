@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkPassword, endSession, requireAdmin, startSession, adminConfigured } from "@/lib/auth";
-import { deleteNote, deletePost, getBookChapterById, getPostById, saveBookChapter, savePost, setNoteStatus } from "@/lib/store";
+import { deleteNote, deletePost, getBookChapterById, getMemberById, getPostById, saveBookChapter, savePost, setMemberPassword, setMemberStatus, setNoteStatus } from "@/lib/store";
+import { hashPassword, randomTempPassword } from "@/lib/members";
 import { slugify } from "@/lib/markdown";
 import { categories } from "@/lib/site";
 import { tooMany } from "@/lib/rateLimit";
@@ -101,6 +102,23 @@ export async function noteAction(formData: FormData) {
   }
   revalidatePath("/notes");
   redirect("/admin#notes");
+}
+
+export async function memberAction(formData: FormData) {
+  requireAdmin();
+  const id = String(formData.get("id") || "");
+  const action = String(formData.get("action") || "");
+  const member = id ? await getMemberById(id) : null;
+  if (!member) redirect("/admin#members");
+  if (action === "block") await setMemberStatus(id, "blocked");
+  else if (action === "unblock") await setMemberStatus(id, "active");
+  else if (action === "reset") {
+    const temp = randomTempPassword();
+    await setMemberPassword(id, hashPassword(temp));
+    redirect(`/admin?temp=${encodeURIComponent(temp)}&for=${encodeURIComponent(member.username)}#members`);
+  }
+  revalidatePath("/notes");
+  redirect("/admin#members");
 }
 
 export async function saveChapterAction(formData: FormData) {
